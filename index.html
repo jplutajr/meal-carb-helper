@@ -3,92 +3,518 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Meal Carb Helper</title>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 16px; color: #222; }
-    .container { max-width: 680px; margin: 0 auto; background: #fff; padding: 18px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
-    h1 { margin-top: 0; font-size: 26px; text-align: center; }
-    .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; line-height: 1.4; }
-    label { font-weight: bold; display: block; margin-top: 14px; margin-bottom: 6px; }
-    input, textarea, button { width: 100%; box-sizing: border-box; font-size: 16px; }
-    input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-    textarea { min-height: 80px; }
-    button { margin-top: 18px; padding: 14px; border: none; border-radius: 10px; background: #1a73e8; color: white; font-weight: bold; cursor: pointer; }
-    button:disabled { background: #9bbce8; cursor: not-allowed; }
-    img { max-width: 100%; margin-top: 12px; border-radius: 10px; display: none; }
-    .result { margin-top: 20px; padding: 14px; background: #eef7ee; border: 1px solid #b9dfb9; border-radius: 10px; display: none; }
-    .error { margin-top: 20px; padding: 14px; background: #fdecea; border: 1px solid #f5c2c0; border-radius: 10px; display: none; }
-    .small { font-size: 13px; color: #555; line-height: 1.4; }
-    .food-item { padding: 8px; margin-top: 8px; background: #fff; border-radius: 8px; border: 1px solid #ddd; }
-    .settings { margin-top: 18px; padding: 12px; background: #f7f7f7; border-radius: 10px; font-size: 14px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 16px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 26px;
+      text-align: center;
+    }
+
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea,
+    button {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    input,
+    textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    textarea {
+      min-height: 90px;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #1a73e8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #444;
+    }
+
+    button.photo {
+      background: #0b8043;
+    }
+
+    button:disabled {
+      background: #9bbce8;
+      cursor: not-allowed;
+    }
+
+    img {
+      max-width: 100%;
+      margin-top: 12px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 14px;
+      background: #eef7ee;
+      border: 1px solid #b9dfb9;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .error {
+      margin-top: 20px;
+      padding: 14px;
+      background: #fdecea;
+      border: 1px solid #f5c2c0;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .debug {
+      margin-top: 20px;
+      padding: 12px;
+      background: #111;
+      color: #0f0;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    .food-item {
+      padding: 8px;
+      margin-top: 8px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .settings {
+      margin-top: 18px;
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .history {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .history-item {
+      padding: 8px;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 8px;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Meal Carb Helper</h1>
-    <div class="warning"><strong>Safety:</strong> This app estimates carbs from a photo and calculates a bolus estimate using your saved pump settings. It can be wrong. Always verify before dosing insulin.</div>
+
+    <div class="warning">
+      <strong>Safety:</strong> This app estimates carbs and calculates a bolus estimate using your saved pump settings.
+      It can be wrong. Always verify before dosing insulin.
+    </div>
+
+    <button id="testBackendBtn" class="secondary">Test Backend</button>
+
     <label for="photoInput">Meal Photo</label>
-    <input type="file" id="photoInput" accept="image/*" capture="environment" />
+    <input
+      type="file"
+      id="photoInput"
+      accept="image/*"
+      capture="environment"
+    />
+
     <img id="preview" alt="Meal preview" />
+
     <label for="currentBG">Current BG / Sensor Glucose</label>
-    <input type="number" id="currentBG" placeholder="Example: 145" />
+    <input
+      type="number"
+      id="currentBG"
+      placeholder="Example: 145"
+    />
+
     <label for="activeInsulin">Active Insulin / IOB</label>
-    <input type="number" id="activeInsulin" step="0.1" placeholder="Example: 1.2" />
-    <label for="notes">Optional Notes</label>
-    <textarea id="notes" placeholder="Example: 2 slices pizza, thin crust, label says 32g each, ate half the fries, etc."></textarea>
-    <button id="analyzeBtn">Analyze Meal</button>
-    <div class="settings"><strong>Saved pump math:</strong><br>Carb ratio: 1 unit per 15g carbs<br>Correction factor: 1 unit lowers 45 mg/dL<br>Target BG: 100 mg/dL<br>Bolus rounding: nearest 0.1u</div>
+    <input
+      type="number"
+      id="activeInsulin"
+      step="0.1"
+      placeholder="Example: 1.2"
+    />
+
+    <label for="notes">Food Notes</label>
+    <textarea
+      id="notes"
+      placeholder="Example: 14 Ritz crackers, 2 slices pizza, label says 32g carbs, etc."
+    ></textarea>
+
+    <button id="textOnlyBtn">Text-Only Estimate</button>
+    <button id="photoBtn" class="photo">Analyze Meal Photo</button>
+
+    <div class="settings">
+      <strong>Saved pump math:</strong><br>
+      Carb ratio: 1 unit per 15g carbs<br>
+      Correction factor: 1 unit lowers 45 mg/dL<br>
+      Target BG: 100 mg/dL<br>
+      Bolus rounding: nearest 0.1u
+    </div>
+
     <div id="result" class="result"></div>
     <div id="error" class="error"></div>
+
+    <h3>Debug Log</h3>
+    <div id="debug" class="debug">Ready.</div>
+
+    <div class="history">
+      <h3>Local History</h3>
+      <div id="historyList">No local history yet.</div>
+      <button id="clearHistoryBtn" class="secondary">Clear Local History</button>
+    </div>
   </div>
+
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzfu6LCnLa62reNsZ3FhgjsNkj9upp76y8D6VovR7vfxnv1MSTW5xHDNmo7hTR_0IOpfQ/exec";
+
     const photoInput = document.getElementById("photoInput");
     const preview = document.getElementById("preview");
-    const analyzeBtn = document.getElementById("analyzeBtn");
+    const testBackendBtn = document.getElementById("testBackendBtn");
+    const textOnlyBtn = document.getElementById("textOnlyBtn");
+    const photoBtn = document.getElementById("photoBtn");
     const resultDiv = document.getElementById("result");
     const errorDiv = document.getElementById("error");
+    const debugDiv = document.getElementById("debug");
+    const historyList = document.getElementById("historyList");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
     let selectedBase64 = "";
-    photoInput.addEventListener("change", function () {
-      const file = photoInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const dataUrl = event.target.result;
-        preview.src = dataUrl;
-        preview.style.display = "block";
-        selectedBase64 = dataUrl.split(",")[1];
-      };
-      reader.readAsDataURL(file);
-    });
-    analyzeBtn.addEventListener("click", async function () {
+
+    function logDebug(message) {
+      const time = new Date().toLocaleTimeString();
+      debugDiv.textContent += "\n[" + time + "] " + message;
+    }
+
+    function resetMessages() {
       resultDiv.style.display = "none";
       errorDiv.style.display = "none";
       resultDiv.innerHTML = "";
       errorDiv.innerHTML = "";
-      if (!selectedBase64) { showError("Please upload or take a meal photo first."); return; }
-      const currentBGValue = document.getElementById("currentBG").value;
-      const activeInsulinValue = document.getElementById("activeInsulin").value;
-      const notesValue = document.getElementById("notes").value;
-      const currentBG = currentBGValue ? Number(currentBGValue) : 0;
-      const activeInsulin = activeInsulinValue ? Number(activeInsulinValue) : 0;
-      analyzeBtn.disabled = true;
-      analyzeBtn.textContent = "Analyzing...";
-      try {
-        const response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ image: selectedBase64, currentBG: currentBG, activeInsulin: activeInsulin, notes: notesValue }) });
-        const data = await response.json();
-        if (!data.success) throw new Error(data.error || "Unknown backend error.");
-        showResult(data);
-      } catch (err) { showError(err.message); }
-      finally { analyzeBtn.disabled = false; analyzeBtn.textContent = "Analyze Meal"; }
+      debugDiv.textContent = "Ready.";
+    }
+
+    photoInput.addEventListener("change", function () {
+      const file = photoInput.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      logDebug("Photo selected: " + file.name + " / " + Math.round(file.size / 1024) + " KB");
+
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        const dataUrl = event.target.result;
+        preview.src = dataUrl;
+        preview.style.display = "block";
+
+        selectedBase64 = dataUrl.split(",")[1];
+        logDebug("Photo loaded as base64. Length: " + selectedBase64.length);
+      };
+
+      reader.readAsDataURL(file);
     });
+
+    testBackendBtn.addEventListener("click", async function () {
+      resetMessages();
+      logDebug("Testing backend health check...");
+
+      try {
+        const url = WEB_APP_URL + "?v=" + Date.now();
+        const response = await fetch(url);
+        const data = await response.json();
+
+        logDebug("Backend response received.");
+        showResult({
+          carbs: "-",
+          carbRange: { low: "-", high: "-" },
+          confidence: "backend test",
+          suggestedBolus: "-",
+          foods: [
+            {
+              name: data.message || "Backend response",
+              estimated_portion: data.time || "",
+              estimated_carbs_g: "-"
+            }
+          ]
+        });
+
+      } catch (err) {
+        showError("Backend test failed: " + err.message);
+        logDebug("Backend test failed: " + err.message);
+      }
+    });
+
+    textOnlyBtn.addEventListener("click", async function () {
+      resetMessages();
+
+      const notes = document.getElementById("notes").value.trim();
+      const currentBG = document.getElementById("currentBG").value || "0";
+      const activeInsulin = document.getElementById("activeInsulin").value || "0";
+
+      if (!notes) {
+        showError("Type food notes first. Example: 14 Ritz crackers.");
+        return;
+      }
+
+      textOnlyBtn.disabled = true;
+      textOnlyBtn.textContent = "Estimating Text...";
+
+      try {
+        logDebug("Starting text-only estimate.");
+        logDebug("Notes: " + notes);
+
+        const url =
+          WEB_APP_URL +
+          "?action=estimateText" +
+          "&notes=" + encodeURIComponent(notes) +
+          "&currentBG=" + encodeURIComponent(currentBG) +
+          "&activeInsulin=" + encodeURIComponent(activeInsulin) +
+          "&v=" + Date.now();
+
+        logDebug("Sending GET request to Apps Script.");
+
+        const response = await fetch(url);
+        logDebug("HTTP response received.");
+
+        const data = await response.json();
+        logDebug("JSON parsed.");
+
+        if (!data.success) {
+          throw new Error(data.error || "Backend returned success:false.");
+        }
+
+        showResult(data);
+        saveLocalHistory("Text", notes, data);
+
+      } catch (err) {
+        showError(err.message);
+        logDebug("Text-only error: " + err.message);
+      } finally {
+        textOnlyBtn.disabled = false;
+        textOnlyBtn.textContent = "Text-Only Estimate";
+      }
+    });
+
+    photoBtn.addEventListener("click", async function () {
+      resetMessages();
+
+      if (!selectedBase64) {
+        showError("Please upload or take a meal photo first, or use Text-Only Estimate.");
+        return;
+      }
+
+      const currentBG = Number(document.getElementById("currentBG").value || 0);
+      const activeInsulin = Number(document.getElementById("activeInsulin").value || 0);
+      const notes = document.getElementById("notes").value || "";
+
+      photoBtn.disabled = true;
+      photoBtn.textContent = "Analyzing Photo...";
+
+      try {
+        logDebug("Starting photo POST.");
+        logDebug("Base64 length: " + selectedBase64.length);
+
+        const controller = new AbortController();
+        const timeout = setTimeout(function () {
+          controller.abort();
+        }, 45000);
+
+        const response = await fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            image: selectedBase64,
+            currentBG: currentBG,
+            activeInsulin: activeInsulin,
+            notes: notes
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeout);
+
+        logDebug("Photo response received.");
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || "Backend returned success:false.");
+        }
+
+        showResult(data);
+        saveLocalHistory("Photo", notes, data);
+
+      } catch (err) {
+        showError(err.message);
+        logDebug("Photo error: " + err.message);
+      } finally {
+        photoBtn.disabled = false;
+        photoBtn.textContent = "Analyze Meal Photo";
+      }
+    });
+
     function showResult(data) {
-      const foodsHtml = data.foods.map(function (food) { return `<div class="food-item"><strong>${escapeHtml(food.name)}</strong><br>Portion: ${escapeHtml(food.estimated_portion || "Not sure")}<br>Estimated carbs: ${food.estimated_carbs_g}g</div>`; }).join("");
-      resultDiv.innerHTML = `<h2>Result</h2><p><strong>Estimated Carbs:</strong> ${data.carbs}g</p><p><strong>Carb Range:</strong> ${data.carbRange.low}g – ${data.carbRange.high}g</p><p><strong>Confidence:</strong> ${data.confidence}</p><p><strong>Suggested Bolus Estimate:</strong> ${data.suggestedBolus} units</p><p class="small">This is calculated using your saved settings. Confirm with your pump/CGM before dosing.</p><h3>Foods Detected</h3>${foodsHtml}`;
+      const foods = data.foods || [];
+
+      const foodsHtml = foods.map(function (food) {
+        return `
+          <div class="food-item">
+            <strong>${escapeHtml(food.name)}</strong><br>
+            Portion: ${escapeHtml(food.estimated_portion || "Not sure")}<br>
+            Estimated carbs: ${food.estimated_carbs_g}g
+          </div>
+        `;
+      }).join("");
+
+      resultDiv.innerHTML = `
+        <h2>Result</h2>
+
+        <p><strong>Estimated Carbs:</strong> ${data.carbs}g</p>
+        <p><strong>Carb Range:</strong> ${data.carbRange.low}g – ${data.carbRange.high}g</p>
+        <p><strong>Confidence:</strong> ${data.confidence}</p>
+        <p><strong>Suggested Bolus Estimate:</strong> ${data.suggestedBolus} units</p>
+
+        <p class="small">
+          This is calculated using your saved settings. Confirm with your pump/CGM before dosing.
+        </p>
+
+        <h3>Foods Detected</h3>
+        ${foodsHtml || "<p>No foods returned.</p>"}
+      `;
+
       resultDiv.style.display = "block";
     }
-    function showError(message) { errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(message)}`; errorDiv.style.display = "block"; }
-    function escapeHtml(text) { return String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+
+    function showError(message) {
+      errorDiv.innerHTML = `
+        <strong>Error:</strong> ${escapeHtml(message)}
+      `;
+      errorDiv.style.display = "block";
+    }
+
+    function saveLocalHistory(mode, notes, data) {
+      const existing = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
+
+      existing.unshift({
+        time: new Date().toLocaleString(),
+        mode: mode,
+        notes: notes,
+        carbs: data.carbs,
+        bolus: data.suggestedBolus,
+        confidence: data.confidence
+      });
+
+      localStorage.setItem("mealCarbHistory", JSON.stringify(existing.slice(0, 20)));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
+
+      if (!history.length) {
+        historyList.innerHTML = "No local history yet.";
+        return;
+      }
+
+      historyList.innerHTML = history.map(function (item) {
+        return `
+          <div class="history-item">
+            <strong>${escapeHtml(item.time)}</strong><br>
+            Mode: ${escapeHtml(item.mode)}<br>
+            Notes: ${escapeHtml(item.notes)}<br>
+            Carbs: ${escapeHtml(item.carbs)}g<br>
+            Bolus: ${escapeHtml(item.bolus)}u<br>
+            Confidence: ${escapeHtml(item.confidence)}
+          </div>
+        `;
+      }).join("");
+    }
+
+    clearHistoryBtn.addEventListener("click", function () {
+      localStorage.removeItem("mealCarbHistory");
+      renderHistory();
+    });
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    renderHistory();
   </script>
 </body>
 </html>
