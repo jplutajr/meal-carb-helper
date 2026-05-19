@@ -100,7 +100,7 @@
     </div>
 
     <h3>Debug Log</h3>
-    <div id="debug" class="debug">Ready. Version: stable-4-timeout-fix</div>
+    <div id="debug" class="debug">Ready. Version: stable-5-form-submit-fix</div>
 
     <div class="history">
       <h3>Local History</h3>
@@ -161,7 +161,7 @@ function resetMessages(){
   els.errorDiv.innerHTML="";
   els.statusBox.style.display="none";
   els.statusBox.innerHTML="";
-  els.debugDiv.textContent="Ready. Version: stable-4-timeout-fix";
+  els.debugDiv.textContent="Ready. Version: stable-5-form-submit-fix";
 }
 
 function showStatus(message){
@@ -331,20 +331,11 @@ els.photoBtn.addEventListener("click", async function(){
   logDebug("Image base64 length: " + selectedBase64.length);
 
   try {
-    logDebug("Creating PhotoQueue row before upload.");
-    const queued = await jsonpRequest({
-      action: "startPhotoRequest",
-      requestId,
-      notes,
-      currentBG,
-      activeInsulin
-    }, 75000);
-
-    if (!queued.success) {
-      throw new Error(queued.error || "Could not create PhotoQueue row.");
-    }
-
-    logDebug("Queue row created. Submitting hidden form.");
+    // Critical fix:
+    // Do NOT wait for startPhotoRequest before uploading.
+    // Apps Script JSONP GETs can return slowly through script.googleusercontent.com.
+    // Waiting here caused the app to create a QUEUED row but never submit the actual image.
+    logDebug("Submitting hidden form immediately.");
     submitPhotoViaHiddenForm({
       requestId,
       imageBase64:selectedBase64,
@@ -353,7 +344,9 @@ els.photoBtn.addEventListener("click", async function(){
       activeInsulin
     });
 
-    showStatus("Photo queued and submitted. Waiting for analysis...");
+    showStatus("Photo submitted. Waiting for Apps Script/Gemini analysis...");
+    logDebug("Hidden form submitted. Starting polling.");
+
     await startPollingForPhotoResult(requestId);
 
   } catch (err) {
