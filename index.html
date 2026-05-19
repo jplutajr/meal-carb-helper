@@ -3,46 +3,233 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Meal Carb Helper</title>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 16px; color: #222; }
-    .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 18px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
-    h1 { margin-top: 0; font-size: 26px; text-align: center; }
-    h2, h3 { margin-bottom: 8px; }
-    .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; line-height: 1.4; }
-    .smartguard { background: #e8f0fe; border: 1px solid #c7d2fe; padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 14px; line-height: 1.4; }
-    label { font-weight: bold; display: block; margin-top: 14px; margin-bottom: 6px; }
-    input, textarea, button, select { width: 100%; box-sizing: border-box; font-size: 16px; }
-    input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-    textarea { min-height: 90px; }
-    button { margin-top: 12px; padding: 14px; border: none; border-radius: 10px; background: #1a73e8; color: white; font-weight: bold; cursor: pointer; }
-    button.photo { background: #0b8043; }
-    button.secondary { background: #444; }
-    button.favorite { background: #7b3fe4; }
-    button.danger { background: #9b1c1c; }
-    button:disabled { background: #9bbce8; cursor: not-allowed; }
-    img { max-width: 100%; margin-top: 12px; border-radius: 10px; display: none; }
-    .settings, .panel { margin-top: 18px; padding: 12px; background: #f7f7f7; border-radius: 10px; font-size: 14px; }
-    .result { margin-top: 20px; padding: 14px; background: #eef7ee; border: 1px solid #b9dfb9; border-radius: 10px; display: none; }
-    .error { margin-top: 20px; padding: 14px; background: #fdecea; border: 1px solid #f5c2c0; border-radius: 10px; display: none; }
-    .food-item, .history-item, .favorite-item { padding: 8px; margin-top: 8px; background: #fff; border-radius: 8px; border: 1px solid #ddd; }
-    .debug { margin-top: 20px; padding: 12px; background: #111; color: #0f0; border-radius: 10px; font-family: monospace; font-size: 13px; white-space: pre-wrap; min-height: 100px; max-height: 260px; overflow: auto; }
-    .history { margin-top: 20px; padding: 12px; background: #f7f7f7; border-radius: 10px; font-size: 14px; }
-    .small { font-size: 13px; color: #555; line-height: 1.4; }
-    .statusBox { margin-top: 12px; padding: 10px; border-radius: 10px; background: #eef2ff; border: 1px solid #c7d2fe; display: none; font-size: 14px; }
-    .carbMain { font-size: 32px; font-weight: bold; }
-    .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    @media (max-width: 650px) { .twoCol { grid-template-columns: 1fr; } }
-    iframe { display: none; width: 0; height: 0; border: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 16px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 26px;
+      text-align: center;
+    }
+
+    h2, h3 {
+      margin-bottom: 8px;
+    }
+
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .smartguard {
+      background: #e8f0fe;
+      border: 1px solid #c7d2fe;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea,
+    button,
+    select {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    input,
+    textarea,
+    select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    textarea {
+      min-height: 90px;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #1a73e8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button.photo {
+      background: #0b8043;
+    }
+
+    button.secondary {
+      background: #444;
+    }
+
+    button.favorite {
+      background: #7b3fe4;
+    }
+
+    button.danger {
+      background: #9b1c1c;
+    }
+
+    button:disabled {
+      background: #9bbce8;
+      cursor: not-allowed;
+    }
+
+    img {
+      max-width: 100%;
+      margin-top: 12px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .settings,
+    .panel {
+      margin-top: 18px;
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 14px;
+      background: #eef7ee;
+      border: 1px solid #b9dfb9;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .error {
+      margin-top: 20px;
+      padding: 14px;
+      background: #fdecea;
+      border: 1px solid #f5c2c0;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .food-item,
+    .history-item,
+    .favorite-item {
+      padding: 8px;
+      margin-top: 8px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .debug {
+      margin-top: 20px;
+      padding: 12px;
+      background: #111;
+      color: #0f0;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      min-height: 100px;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .history {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    .statusBox {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      display: none;
+      font-size: 14px;
+    }
+
+    .carbMain {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 4px 0 10px;
+    }
+
+    .twoCol {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 650px) {
+      .twoCol {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    iframe {
+      display: none;
+      width: 0;
+      height: 0;
+      border: 0;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Meal Carb Helper</h1>
 
     <div class="warning">
-      <strong>Safety:</strong> This app estimates the carbs to enter into your MiniMed 780G. It can be wrong.
-      Verify before dosing. Your pump/SmartGuard calculates the actual insulin dose.
+      <strong>Safety:</strong> This app estimates the carbs to enter into your MiniMed 780G.
+      It can be wrong. Verify before dosing. Your pump/SmartGuard calculates the actual insulin dose.
     </div>
 
     <button id="testBackendBtn" class="secondary">Test Backend</button>
@@ -75,7 +262,7 @@
     <div class="settings">
       <strong>MiniMed 780G workflow:</strong><br>
       Main output = <strong>carbs to enter into pump</strong>.<br>
-      Your pump/SmartGuard calculates actual bolus using your settings, sensor/BG, insulin on board, and algorithm behavior.<br>
+      Your pump/SmartGuard calculates actual bolus using your settings, sensor/BG, insulin-on-board, and algorithm behavior.<br>
       Reference insulin math shown below is optional only.
     </div>
 
@@ -84,11 +271,17 @@
 
     <div class="panel">
       <h3>Manual carb correction / Save Favorite</h3>
-      <p class="small">Use this when the app identifies the food but the carb count is off. Example: change a Hershey Kiss from 5g to 3.6g and save it.</p>
+      <p class="small">
+        Use this when the app identifies the food but the carb count is off.
+        Example: change a Hershey Kiss from 5g to 3.6g and save it.
+      </p>
+
       <label for="manualCarbs">Corrected Carbs</label>
       <input type="number" id="manualCarbs" step="0.1" placeholder="Example: 3.6" />
+
       <label for="favoriteName">Favorite Name</label>
       <input type="text" id="favoriteName" placeholder="Example: 1 Hershey Kiss" />
+
       <button id="updateDisplayBtn" class="secondary">Update Display With Corrected Carbs</button>
       <button id="saveFavoriteBtn" class="favorite">Save Current Meal to Favorites</button>
     </div>
@@ -142,8 +335,8 @@
 
     let selectedBase64 = "";
     let selectedPhotoReady = false;
-    let activePollTimer = null;
     let currentResult = null;
+    let pollingActive = false;
 
     function logDebug(message) {
       const time = new Date().toLocaleTimeString();
@@ -170,15 +363,24 @@
       return "photo_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
     }
 
+    function sleep(ms) {
+      return new Promise(function(resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
     function jsonpRequest(params, timeoutMs = 90000) {
       return new Promise(function(resolve, reject) {
         const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+
         params.callback = callbackName;
         params.v = Date.now();
 
-        const query = Object.keys(params).map(function(key) {
-          return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
-        }).join("&");
+        const query = Object.keys(params)
+          .map(function(key) {
+            return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+          })
+          .join("&");
 
         const script = document.createElement("script");
         script.src = WEB_APP_URL + "?" + query;
@@ -200,8 +402,16 @@
 
         function cleanup() {
           clearTimeout(timer);
-          if (script.parentNode) script.parentNode.removeChild(script);
-          try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+
+          try {
+            delete window[callbackName];
+          } catch (e) {
+            window[callbackName] = undefined;
+          }
         }
 
         document.body.appendChild(script);
@@ -210,7 +420,10 @@
 
     els.photoInput.addEventListener("change", function () {
       const file = els.photoInput.files[0];
-      if (!file) return;
+
+      if (!file) {
+        return;
+      }
 
       resetMessages();
       selectedPhotoReady = false;
@@ -219,11 +432,20 @@
       logDebug("Photo selected: " + file.name + " / " + Math.round(file.size / 1024) + " KB");
       showStatus("Preparing photo...");
 
-      compressImage(file, 800, 0.62, function(dataUrl) {
+      compressImage(file, 520, 0.45, function(dataUrl) {
         els.preview.src = dataUrl;
         els.preview.style.display = "block";
+
         selectedBase64 = dataUrl.split(",")[1];
         selectedPhotoReady = true;
+
+        if (selectedBase64.length > 350000) {
+          selectedPhotoReady = false;
+          showError("Photo is still too large after compression. Retake the photo farther back, with less zoom, or use a simpler photo.");
+          logDebug("Compressed image is too large: " + selectedBase64.length);
+          return;
+        }
+
         logDebug("Photo compressed and loaded.");
         logDebug("Base64 length: " + selectedBase64.length);
         showStatus("Photo ready. Add notes if helpful, then tap Analyze Meal Photo.");
@@ -233,14 +455,21 @@
     els.testBackendBtn.addEventListener("click", async function () {
       resetMessages();
       logDebug("Testing backend with JSONP health check...");
+
       els.testBackendBtn.disabled = true;
       els.testBackendBtn.textContent = "Testing...";
 
       try {
         const data = await jsonpRequest({}, 30000);
+
         logDebug("JSONP backend response received.");
-        if (!data.success) throw new Error(data.error || "Backend returned success:false.");
+
+        if (!data.success) {
+          throw new Error(data.error || "Backend returned success:false.");
+        }
+
         showStatus("Backend running: " + data.time);
+
       } catch (err) {
         showError(err.message);
         logDebug("Backend test error: " + err.message);
@@ -267,16 +496,21 @@
 
       try {
         logDebug("Starting text-only estimate.");
+
         const data = await jsonpRequest({
           action: "estimateText",
-          notes,
-          currentBG,
-          activeInsulin
+          notes: notes,
+          currentBG: currentBG,
+          activeInsulin: activeInsulin
         }, 90000);
 
-        if (!data.success) throw new Error(data.error || "Backend returned success:false.");
+        if (!data.success) {
+          throw new Error(data.error || "Backend returned success:false.");
+        }
+
         showResult(data);
         saveLocalHistory("Text", notes, data);
+
       } catch (err) {
         showError(err.message);
         logDebug("Text-only error: " + err.message);
@@ -298,22 +532,34 @@
         return;
       }
 
+      if (pollingActive) {
+        showError("A photo analysis is already running. Wait for it to finish.");
+        return;
+      }
+
       const requestId = createRequestId();
+
       els.photoBtn.disabled = true;
       els.photoBtn.textContent = "Submitting Photo...";
 
       logDebug("Starting photo workflow. Request ID: " + requestId);
+      logDebug("Image base64 length: " + selectedBase64.length);
       showStatus("Submitting photo for analysis...");
 
-      submitPhotoViaHiddenForm({ requestId, imageBase64: selectedBase64, notes, currentBG, activeInsulin });
+      submitPhotoViaHiddenForm({
+        requestId: requestId,
+        imageBase64: selectedBase64,
+        notes: notes,
+        currentBG: currentBG,
+        activeInsulin: activeInsulin
+      });
 
-      showStatus("Photo submitted. Waiting for Gemini analysis...");
-      logDebug("Hidden form submitted. Starting polling.");
       startPollingForPhotoResult(requestId, notes);
     });
 
     function submitPhotoViaHiddenForm(payload) {
       const form = document.createElement("form");
+
       form.method = "POST";
       form.action = WEB_APP_URL;
       form.target = "uploadFrame";
@@ -331,7 +577,9 @@
       form.submit();
 
       setTimeout(function() {
-        if (form.parentNode) form.parentNode.removeChild(form);
+        if (form.parentNode) {
+          form.parentNode.removeChild(form);
+        }
       }, 5000);
     }
 
@@ -343,68 +591,80 @@
       form.appendChild(input);
     }
 
-    function startPollingForPhotoResult(requestId, notes) {
-      let attempts = 0;
-      const maxAttempts = 40;
+    async function startPollingForPhotoResult(requestId, notes) {
+      const maxAttempts = 30;
 
-      if (activePollTimer) clearInterval(activePollTimer);
+      pollingActive = true;
+      showStatus("Photo submitted. Giving Apps Script a few seconds to receive it...");
+      logDebug("Hidden form submitted. Waiting 8 seconds before first poll.");
 
-      activePollTimer = setInterval(async function () {
-        attempts += 1;
+      await sleep(8000);
+
+      for (let attempts = 1; attempts <= maxAttempts; attempts++) {
         try {
           logDebug("Polling photo result. Attempt " + attempts + "/" + maxAttempts);
-          const data = await jsonpRequest({ action: "getPhotoResult", requestId }, 30000);
 
-          if (!data.success && data.status !== "ERROR") throw new Error(data.error || "Backend returned success:false.");
+          const data = await jsonpRequest({
+            action: "getPhotoResult",
+            requestId: requestId
+          }, 60000);
+
+          if (!data.success && data.status !== "ERROR") {
+            throw new Error(data.error || "Backend returned success:false.");
+          }
 
           if (data.status === "NOT_FOUND") {
+            if (attempts >= 4) {
+              throw new Error("Apps Script never received the photo upload. The image payload may be too large, or the deployed Code.gs version may not include submitPhoto.");
+            }
+
             showStatus("Photo request not found yet. Waiting...");
-            return;
+            await sleep(5000);
+            continue;
           }
 
           if (data.status === "PROCESSING") {
             showStatus("Still analyzing photo... attempt " + attempts + "/" + maxAttempts);
-            return;
+            await sleep(5000);
+            continue;
           }
 
           if (data.status === "ERROR") {
-            clearInterval(activePollTimer);
-            activePollTimer = null;
-            els.photoBtn.disabled = false;
-            els.photoBtn.textContent = "Analyze Meal Photo";
             throw new Error(data.error || "Photo processing failed.");
           }
 
           if (data.status === "COMPLETE") {
-            clearInterval(activePollTimer);
-            activePollTimer = null;
-            els.photoBtn.disabled = false;
-            els.photoBtn.textContent = "Analyze Meal Photo";
             logDebug("Photo result complete.");
             showStatus("Photo analysis complete.");
+
             showResult(data);
             saveLocalHistory("Photo", notes, data);
             loadSheetHistory();
+
+            finishPhotoWorkflow();
             return;
           }
 
+          showStatus("Unknown photo status: " + data.status);
+          await sleep(5000);
+
         } catch (err) {
-          clearInterval(activePollTimer);
-          activePollTimer = null;
-          els.photoBtn.disabled = false;
-          els.photoBtn.textContent = "Analyze Meal Photo";
           showError(err.message);
           logDebug("Photo polling error: " + err.message);
+          finishPhotoWorkflow();
+          return;
         }
+      }
 
-        if (attempts >= maxAttempts) {
-          clearInterval(activePollTimer);
-          activePollTimer = null;
-          els.photoBtn.disabled = false;
-          els.photoBtn.textContent = "Analyze Meal Photo";
-          showError("Photo analysis timed out. Try again with a smaller/simple photo.");
-        }
-      }, 4000);
+      showError("Photo analysis timed out. Try again with a simpler, smaller photo.");
+      logDebug("Photo analysis timed out.");
+      finishPhotoWorkflow();
+    }
+
+    function finishPhotoWorkflow() {
+      pollingActive = false;
+      els.photoBtn.disabled = false;
+      els.photoBtn.textContent = "Analyze Meal Photo";
     }
 
     els.updateDisplayBtn.addEventListener("click", function() {
@@ -414,16 +674,21 @@
       }
 
       const corrected = Number(els.manualCarbs.value);
-      if (!corrected && corrected !== 0) {
+
+      if (Number.isNaN(corrected)) {
         showError("Enter a corrected carb amount first.");
         return;
       }
 
       currentResult.carbs = corrected;
-      currentResult.carbRange = { low: corrected, high: corrected };
+      currentResult.carbRange = {
+        low: corrected,
+        high: corrected
+      };
       currentResult.confidence = "manual";
       currentResult.carbEstimateConfidence = "manual";
       currentResult.referenceInsulin = calculateReferenceInsulinClient(corrected);
+
       showResult(currentResult);
       showStatus("Display updated with corrected carbs. Enter this carb amount into your pump if it matches what you are eating.");
     });
@@ -456,9 +721,13 @@
           source: currentResult.mode || "app"
         }, 30000);
 
-        if (!data.success) throw new Error(data.error || "Could not save favorite.");
+        if (!data.success) {
+          throw new Error(data.error || "Could not save favorite.");
+        }
+
         showStatus("Saved favorite: " + data.favoriteName + " (" + data.carbs + "g carbs)");
         loadFavorites();
+
       } catch (err) {
         showError(err.message);
       }
@@ -468,10 +737,18 @@
 
     async function loadFavorites() {
       els.favoritesList.innerHTML = "Loading favorites...";
+
       try {
-        const data = await jsonpRequest({ action: "getFavorites" }, 30000);
-        if (!data.success) throw new Error(data.error || "Could not load favorites.");
+        const data = await jsonpRequest({
+          action: "getFavorites"
+        }, 30000);
+
+        if (!data.success) {
+          throw new Error(data.error || "Could not load favorites.");
+        }
+
         renderFavorites(data.favorites || []);
+
       } catch (err) {
         els.favoritesList.innerHTML = "Error loading favorites: " + escapeHtml(err.message);
       }
@@ -501,11 +778,21 @@
       const activeInsulin = document.getElementById("activeInsulin").value || "0";
 
       try {
-        const data = await jsonpRequest({ action: "useFavorite", favoriteId, currentBG, activeInsulin }, 30000);
-        if (!data.success) throw new Error(data.error || "Could not use favorite.");
+        const data = await jsonpRequest({
+          action: "useFavorite",
+          favoriteId: favoriteId,
+          currentBG: currentBG,
+          activeInsulin: activeInsulin
+        }, 30000);
+
+        if (!data.success) {
+          throw new Error(data.error || "Could not use favorite.");
+        }
+
         showResult(data);
         saveLocalHistory("Favorite", data.favoriteName || data.mealName || "", data);
         showStatus("Favorite loaded. Main number is carbs to enter into your pump.");
+
       } catch (err) {
         showError(err.message);
       }
@@ -516,10 +803,18 @@
     async function loadSheetHistory() {
       els.sheetHistoryList.innerHTML = "Loading Sheet history...";
       logDebug("Loading Sheet history...");
+
       try {
-        const data = await jsonpRequest({ action: "history" }, 30000);
-        if (!data.success) throw new Error(data.error || "Could not load history.");
+        const data = await jsonpRequest({
+          action: "history"
+        }, 30000);
+
+        if (!data.success) {
+          throw new Error(data.error || "Could not load history.");
+        }
+
         renderSheetHistory(data.meals || []);
+
       } catch (err) {
         els.sheetHistoryList.innerHTML = "Error loading Sheet history: " + escapeHtml(err.message);
       }
@@ -548,8 +843,10 @@
 
       els.resultDiv.innerHTML = `
         <h2>Result</h2>
+
         <p>Carbs to enter into MiniMed:</p>
         <div class="carbMain">${escapeHtml(data.carbs)}g</div>
+
         <p><strong>Carb Range:</strong> ${escapeHtml(low)}g – ${escapeHtml(high)}g</p>
         <p><strong>Overall Confidence:</strong> ${escapeHtml(data.confidence || "")}</p>
         <p><strong>Food ID Confidence:</strong> ${escapeHtml(data.foodIdConfidence || data.confidence || "")}</p>
@@ -579,6 +876,7 @@
       const carbUnits = carbs / 15;
       const correctionUnits = currentBG > 100 ? (currentBG - 100) / 45 : 0;
       const adjusted = Math.max(carbUnits + correctionUnits - activeInsulin, 0);
+
       return {
         carbUnits: Math.round(carbUnits * 10) / 10,
         correctionUnits: Math.round(correctionUnits * 10) / 10,
@@ -601,23 +899,27 @@
 
     function saveLocalHistory(mode, notes, data) {
       const existing = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
+
       existing.unshift({
         time: new Date().toLocaleString(),
-        mode,
-        notes,
+        mode: mode,
+        notes: notes,
         carbs: data.carbs,
         confidence: data.confidence
       });
+
       localStorage.setItem("mealCarbHistory", JSON.stringify(existing.slice(0, 20)));
       renderHistory();
     }
 
     function renderHistory() {
       const history = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
+
       if (!history.length) {
         els.historyList.innerHTML = "No local history yet.";
         return;
       }
+
       els.historyList.innerHTML = history.map(function (item) {
         return `
           <div class="history-item">
@@ -636,6 +938,7 @@
         els.sheetHistoryList.innerHTML = "No logged meals yet.";
         return;
       }
+
       els.sheetHistoryList.innerHTML = meals.map(function (item) {
         return `
           <div class="history-item">
@@ -658,30 +961,43 @@
 
     function compressImage(file, maxWidth, quality, callback) {
       const reader = new FileReader();
+
       reader.onload = function(event) {
         const img = new Image();
+
         img.onload = function() {
           const canvas = document.createElement("canvas");
+
           let width = img.width;
           let height = img.height;
+
           if (width > maxWidth) {
             height = Math.round(height * (maxWidth / width));
             width = maxWidth;
           }
+
           canvas.width = width;
           canvas.height = height;
+
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
+
           callback(canvas.toDataURL("image/jpeg", quality));
         };
+
         img.onerror = function() {
           showError("Could not read the selected image.");
+          logDebug("Image load failed.");
         };
+
         img.src = event.target.result;
       };
+
       reader.onerror = function() {
         showError("Could not load the selected file.");
+        logDebug("FileReader failed.");
       };
+
       reader.readAsDataURL(file);
     }
 
@@ -695,7 +1011,12 @@
     }
 
     function escapeHtmlAttr(text) {
-      return String(text).replaceAll("'", "&#039;").replaceAll('"', "&quot;");
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("'", "&#039;")
+        .replaceAll('"', "&quot;");
     }
 
     renderHistory();
