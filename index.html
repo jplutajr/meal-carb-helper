@@ -827,9 +827,10 @@
       const low = data.carbRange && data.carbRange.low !== undefined ? data.carbRange.low : "-";
       const high = data.carbRange && data.carbRange.high !== undefined ? data.carbRange.high : "-";
       const reference = data.referenceInsulin || calculateReferenceInsulinClient(Number(data.carbs || 0));
+      const mealTitle = inferFavoriteName(data);
 
       els.manualCarbs.value = data.carbs || "";
-      els.favoriteName.value = inferFavoriteName(data);
+      els.favoriteName.value = mealTitle;
 
       const foodsHtml = foods.map(function (food) {
         return `
@@ -844,7 +845,10 @@
       els.resultDiv.innerHTML = `
         <h2>Result</h2>
 
-        <p>Carbs to enter into MiniMed:</p>
+        <div class="resultTopLabel">Food detected</div>
+        <div class="foodNameMain">${escapeHtml(mealTitle)}</div>
+
+        <div class="resultTopLabel">Carbs to enter into MiniMed</div>
         <div class="carbMain">${escapeHtml(data.carbs)}g</div>
 
         <p><strong>Carb Range:</strong> ${escapeHtml(low)}g – ${escapeHtml(high)}g</p>
@@ -863,11 +867,18 @@
           Do not use this instead of your pump calculation.
         </p>
 
-        <h3>Foods Detected</h3>
+        <h3>Foods Detected Details</h3>
         ${foodsHtml || "<p>No foods returned.</p>"}
       `;
 
       els.resultDiv.style.display = "block";
+      scrollToResult();
+    }
+
+    function scrollToResult() {
+      setTimeout(function() {
+        els.resultDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     }
 
     function calculateReferenceInsulinClient(carbs) {
@@ -940,6 +951,15 @@
       }
 
       els.sheetHistoryList.innerHTML = meals.map(function (item) {
+        const payload = encodeURIComponent(JSON.stringify({
+          mealName: item.mealName || "Saved meal",
+          carbs: item.carbs || 0,
+          low: item.low || item.carbs || 0,
+          high: item.high || item.carbs || 0,
+          confidence: item.confidence || "history",
+          notes: item.notes || ""
+        }));
+
         return `
           <div class="history-item">
             <strong>${escapeHtml(item.timestamp)}</strong><br>
@@ -949,10 +969,45 @@
             Reference units: ${escapeHtml(item.referenceUnits || "")}u<br>
             BG: ${escapeHtml(item.currentBG)}<br>
             Notes: ${escapeHtml(item.notes)}
+            <button onclick="useHistoryMeal('${payload}')" class="secondary">Use This Meal Again</button>
           </div>
         `;
       }).join("");
     }
+
+    window.useHistoryMeal = function(encodedPayload) {
+      try {
+        const item = JSON.parse(decodeURIComponent(encodedPayload));
+
+        const data = {
+          success: true,
+          mode: "history",
+          mealName: item.mealName,
+          carbs: Number(item.carbs || 0),
+          carbRange: {
+            low: Number(item.low || item.carbs || 0),
+            high: Number(item.high || item.carbs || 0)
+          },
+          confidence: item.confidence || "history",
+          foodIdConfidence: "history",
+          carbEstimateConfidence: "history",
+          foods: [
+            {
+              name: item.mealName,
+              estimated_portion: "Saved from history",
+              estimated_carbs_g: Number(item.carbs || 0)
+            }
+          ],
+          notes: item.notes || "",
+          referenceInsulin: calculateReferenceInsulinClient(Number(item.carbs || 0))
+        };
+
+        showResult(data);
+        showStatus("History meal loaded. Main number is carbs to enter into your pump.");
+      } catch (err) {
+        showError("Could not load that history meal: " + err.message);
+      }
+    };
 
     els.clearHistoryBtn.addEventListener("click", function () {
       localStorage.removeItem("mealCarbHistory");
