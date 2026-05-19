@@ -106,7 +106,7 @@ let selectedBase64 = "";
 let selectedPhotoReady = false;
 let currentResult = null;
 
-function logDebug(message){ const time = new Date().toLocaleTimeString(); els.debugDiv.textContent += "\\n[" + time + "] " + message; els.debugDiv.scrollTop = els.debugDiv.scrollHeight; }
+function logDebug(message){ const time = new Date().toLocaleTimeString(); els.debugDiv.textContent += "\n[" + time + "] " + message; els.debugDiv.scrollTop = els.debugDiv.scrollHeight; }
 function resetMessages(){ els.resultDiv.style.display="none"; els.errorDiv.style.display="none"; els.resultDiv.innerHTML=""; els.errorDiv.innerHTML=""; els.statusBox.style.display="none"; els.statusBox.innerHTML=""; els.debugDiv.textContent="Ready."; }
 function showStatus(message){ els.statusBox.innerHTML=escapeHtml(message); els.statusBox.style.display="block"; }
 function createRequestId(){ return "photo_" + Date.now() + "_" + Math.floor(Math.random()*1000000); }
@@ -392,7 +392,17 @@ function calculateReferenceInsulinClient(carbs){
   const correctionUnits = currentBG > 100 ? (currentBG - 100) / 45 : 0;
   return {roundedUnits: Math.round(Math.max(carbUnits + correctionUnits - activeInsulin, 0) * 10) / 10};
 }
-function showError(message){ els.errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(message)}`; els.errorDiv.style.display="block"; }
+function friendlyError(message){
+  const text = String(message || "");
+  if (text.includes("503") || text.includes("UNAVAILABLE") || text.includes("high demand") || text.includes("temporarily overloaded")) {
+    return "Gemini is temporarily overloaded. This is not your app breaking. Wait 60–90 seconds and try again.";
+  }
+  if (text.includes("429") || text.includes("rate-limited") || text.includes("quota")) {
+    return "Gemini is rate-limited right now. Wait at least 60–90 seconds before trying again.";
+  }
+  return text;
+}
+function showError(message){ els.errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(friendlyError(message))}`; els.errorDiv.style.display="block"; }
 function compressImage(file,maxWidth,quality,callback){
   const reader = new FileReader();
   reader.onload = function(event){
