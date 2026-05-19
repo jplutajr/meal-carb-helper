@@ -77,12 +77,12 @@
       cursor: pointer;
     }
 
-    button.secondary {
-      background: #444;
-    }
-
     button.photo {
       background: #0b8043;
+    }
+
+    button.secondary {
+      background: #444;
     }
 
     button:disabled {
@@ -95,6 +95,14 @@
       margin-top: 12px;
       border-radius: 10px;
       display: none;
+    }
+
+    .settings {
+      margin-top: 18px;
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 10px;
+      font-size: 14px;
     }
 
     .result {
@@ -115,6 +123,14 @@
       display: none;
     }
 
+    .food-item {
+      padding: 8px;
+      margin-top: 8px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
     .debug {
       margin-top: 20px;
       padding: 12px;
@@ -125,28 +141,6 @@
       font-size: 13px;
       white-space: pre-wrap;
       min-height: 80px;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #555;
-      line-height: 1.4;
-    }
-
-    .food-item {
-      padding: 8px;
-      margin-top: 8px;
-      background: #ffffff;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-
-    .settings {
-      margin-top: 18px;
-      padding: 12px;
-      background: #f7f7f7;
-      border-radius: 10px;
-      font-size: 14px;
     }
 
     .history {
@@ -164,6 +158,12 @@
       background: white;
       border-radius: 8px;
     }
+
+    .small {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.4;
+    }
   </style>
 </head>
 
@@ -179,35 +179,17 @@
     <button id="testBackendBtn" class="secondary">Test Backend</button>
 
     <label for="photoInput">Meal Photo</label>
-    <input
-      type="file"
-      id="photoInput"
-      accept="image/*"
-      capture="environment"
-    />
-
+    <input type="file" id="photoInput" accept="image/*" capture="environment" />
     <img id="preview" alt="Meal preview" />
 
     <label for="currentBG">Current BG / Sensor Glucose</label>
-    <input
-      type="number"
-      id="currentBG"
-      placeholder="Example: 145"
-    />
+    <input type="number" id="currentBG" placeholder="Example: 145" />
 
     <label for="activeInsulin">Active Insulin / IOB</label>
-    <input
-      type="number"
-      id="activeInsulin"
-      step="0.1"
-      placeholder="Example: 1.2"
-    />
+    <input type="number" id="activeInsulin" step="0.1" placeholder="Example: 1.2" />
 
     <label for="notes">Food Notes</label>
-    <textarea
-      id="notes"
-      placeholder="Example: 14 Ritz crackers, 2 slices pizza, label says 32g carbs, etc."
-    ></textarea>
+    <textarea id="notes" placeholder="Example: 14 Ritz crackers, 2 slices pizza, label says 32g carbs, etc."></textarea>
 
     <button id="textOnlyBtn">Text-Only Estimate</button>
     <button id="photoBtn" class="photo">Analyze Meal Photo</button>
@@ -265,36 +247,46 @@
     photoInput.addEventListener("change", function () {
       const file = photoInput.files[0];
 
-      if (!file) {
-        return;
-      }
+      if (!file) return;
 
       logDebug("Photo selected: " + file.name + " / " + Math.round(file.size / 1024) + " KB");
 
-      const reader = new FileReader();
-
-      reader.onload = function (event) {
-        const dataUrl = event.target.result;
+      compressImage(file, 900, 0.72, function(dataUrl) {
         preview.src = dataUrl;
         preview.style.display = "block";
 
         selectedBase64 = dataUrl.split(",")[1];
-        logDebug("Photo loaded as base64. Length: " + selectedBase64.length);
-      };
 
-      reader.readAsDataURL(file);
+        logDebug("Photo compressed and loaded.");
+        logDebug("Base64 length: " + selectedBase64.length);
+      });
     });
 
     testBackendBtn.addEventListener("click", async function () {
       resetMessages();
-      logDebug("Testing backend health check...");
+      logDebug("Testing backend with GET health check...");
 
       try {
-        const url = WEB_APP_URL + "?v=" + Date.now();
-        const response = await fetch(url);
-        const data = await response.json();
+        const response = await fetch(WEB_APP_URL + "?v=" + Date.now(), {
+          method: "GET",
+          redirect: "follow"
+        });
 
-        logDebug("Backend response received.");
+        logDebug("HTTP status: " + response.status);
+        const text = await response.text();
+        logDebug("Raw response first 250 chars: " + text.slice(0, 250));
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error("Backend did not return JSON. It returned: " + text.slice(0, 120));
+        }
+
+        if (!data.success) {
+          throw new Error(data.error || "Backend returned success:false.");
+        }
+
         showResult({
           carbs: "-",
           carbRange: { low: "-", high: "-" },
@@ -302,7 +294,7 @@
           suggestedBolus: "-",
           foods: [
             {
-              name: data.message || "Backend response",
+              name: data.message || "Backend running",
               estimated_portion: data.time || "",
               estimated_carbs_g: "-"
             }
@@ -310,8 +302,8 @@
         });
 
       } catch (err) {
-        showError("Backend test failed: " + err.message);
-        logDebug("Backend test failed: " + err.message);
+        showError(err.message);
+        logDebug("Backend test error: " + err.message);
       }
     });
 
@@ -342,13 +334,24 @@
           "&activeInsulin=" + encodeURIComponent(activeInsulin) +
           "&v=" + Date.now();
 
-        logDebug("Sending GET request to Apps Script.");
+        logDebug("Sending GET request.");
 
-        const response = await fetch(url);
-        logDebug("HTTP response received.");
+        const response = await fetch(url, {
+          method: "GET",
+          redirect: "follow"
+        });
 
-        const data = await response.json();
-        logDebug("JSON parsed.");
+        logDebug("HTTP status: " + response.status);
+
+        const text = await response.text();
+        logDebug("Raw response first 250 chars: " + text.slice(0, 250));
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error("Response was not JSON. It returned: " + text.slice(0, 120));
+        }
 
         if (!data.success) {
           throw new Error(data.error || "Backend returned success:false.");
@@ -374,9 +377,9 @@
         return;
       }
 
+      const notes = document.getElementById("notes").value.trim();
       const currentBG = Number(document.getElementById("currentBG").value || 0);
       const activeInsulin = Number(document.getElementById("activeInsulin").value || 0);
-      const notes = document.getElementById("notes").value || "";
 
       photoBtn.disabled = true;
       photoBtn.textContent = "Analyzing Photo...";
@@ -388,7 +391,7 @@
         const controller = new AbortController();
         const timeout = setTimeout(function () {
           controller.abort();
-        }, 45000);
+        }, 60000);
 
         const response = await fetch(WEB_APP_URL, {
           method: "POST",
@@ -398,14 +401,23 @@
             activeInsulin: activeInsulin,
             notes: notes
           }),
+          redirect: "follow",
           signal: controller.signal
         });
 
         clearTimeout(timeout);
 
-        logDebug("Photo response received.");
+        logDebug("HTTP status: " + response.status);
 
-        const data = await response.json();
+        const text = await response.text();
+        logDebug("Raw response first 250 chars: " + text.slice(0, 250));
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error("Photo response was not JSON. It returned: " + text.slice(0, 120));
+        }
 
         if (!data.success) {
           throw new Error(data.error || "Backend returned success:false.");
@@ -431,23 +443,18 @@
           <div class="food-item">
             <strong>${escapeHtml(food.name)}</strong><br>
             Portion: ${escapeHtml(food.estimated_portion || "Not sure")}<br>
-            Estimated carbs: ${food.estimated_carbs_g}g
+            Estimated carbs: ${escapeHtml(food.estimated_carbs_g)}g
           </div>
         `;
       }).join("");
 
       resultDiv.innerHTML = `
         <h2>Result</h2>
-
-        <p><strong>Estimated Carbs:</strong> ${data.carbs}g</p>
-        <p><strong>Carb Range:</strong> ${data.carbRange.low}g – ${data.carbRange.high}g</p>
-        <p><strong>Confidence:</strong> ${data.confidence}</p>
-        <p><strong>Suggested Bolus Estimate:</strong> ${data.suggestedBolus} units</p>
-
-        <p class="small">
-          This is calculated using your saved settings. Confirm with your pump/CGM before dosing.
-        </p>
-
+        <p><strong>Estimated Carbs:</strong> ${escapeHtml(data.carbs)}g</p>
+        <p><strong>Carb Range:</strong> ${escapeHtml(data.carbRange.low)}g – ${escapeHtml(data.carbRange.high)}g</p>
+        <p><strong>Confidence:</strong> ${escapeHtml(data.confidence)}</p>
+        <p><strong>Suggested Bolus Estimate:</strong> ${escapeHtml(data.suggestedBolus)} units</p>
+        <p class="small">This is calculated using your saved settings. Confirm with your pump/CGM before dosing.</p>
         <h3>Foods Detected</h3>
         ${foodsHtml || "<p>No foods returned.</p>"}
       `;
@@ -456,9 +463,7 @@
     }
 
     function showError(message) {
-      errorDiv.innerHTML = `
-        <strong>Error:</strong> ${escapeHtml(message)}
-      `;
+      errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(message)}`;
       errorDiv.style.display = "block";
     }
 
@@ -504,6 +509,39 @@
       localStorage.removeItem("mealCarbHistory");
       renderHistory();
     });
+
+    function compressImage(file, maxWidth, quality, callback) {
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const img = new Image();
+
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round(height * (maxWidth / width));
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+          callback(compressedDataUrl);
+        };
+
+        img.src = event.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
 
     function escapeHtml(text) {
       return String(text)
