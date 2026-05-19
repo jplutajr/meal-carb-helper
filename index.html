@@ -3,234 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Meal Carb Helper</title>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 16px;
-      color: #222;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 18px;
-      border-radius: 14px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      margin-top: 0;
-      font-size: 26px;
-      text-align: center;
-    }
-
-    h2, h3 {
-      margin-bottom: 8px;
-    }
-
-    .warning {
-      background: #fff3cd;
-      border: 1px solid #ffeeba;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    .smartguard {
-      background: #e8f0fe;
-      border: 1px solid #c7d2fe;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 12px;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 14px;
-      margin-bottom: 6px;
-    }
-
-    input,
-    textarea,
-    button,
-    select {
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    input,
-    textarea,
-    select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    textarea {
-      min-height: 90px;
-    }
-
-    button {
-      margin-top: 12px;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      background: #1a73e8;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button.photo {
-      background: #0b8043;
-    }
-
-    button.secondary {
-      background: #444;
-    }
-
-    button.favorite {
-      background: #7b3fe4;
-    }
-
-    button.danger {
-      background: #9b1c1c;
-    }
-
-    button:disabled {
-      background: #9bbce8;
-      cursor: not-allowed;
-    }
-
-    img {
-      max-width: 100%;
-      margin-top: 12px;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .settings,
-    .panel {
-      margin-top: 18px;
-      padding: 12px;
-      background: #f7f7f7;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
-    .result {
-      margin-top: 20px;
-      padding: 14px;
-      background: #eef7ee;
-      border: 1px solid #b9dfb9;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .error {
-      margin-top: 20px;
-      padding: 14px;
-      background: #fdecea;
-      border: 1px solid #f5c2c0;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .food-item,
-    .history-item,
-    .favorite-item {
-      padding: 8px;
-      margin-top: 8px;
-      background: #ffffff;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-
-    .debug {
-      margin-top: 20px;
-      padding: 12px;
-      background: #111;
-      color: #0f0;
-      border-radius: 10px;
-      font-family: monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      min-height: 100px;
-      max-height: 260px;
-      overflow: auto;
-    }
-
-    .history {
-      margin-top: 20px;
-      padding: 12px;
-      background: #f7f7f7;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #555;
-      line-height: 1.4;
-    }
-
-    .statusBox {
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 10px;
-      background: #eef2ff;
-      border: 1px solid #c7d2fe;
-      display: none;
-      font-size: 14px;
-    }
-
-    .carbMain {
-      font-size: 36px;
-      font-weight: bold;
-      margin: 4px 0 10px;
-    }
-
-    .twoCol {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    @media (max-width: 650px) {
-      .twoCol {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    iframe {
-      display: none;
-      width: 0;
-      height: 0;
-      border: 0;
-    }
+    body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:16px; color:#222; }
+    .container { max-width:800px; margin:0 auto; background:#fff; padding:18px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+    h1 { margin-top:0; font-size:26px; text-align:center; }
+    .warning { background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:10px; margin-bottom:16px; font-size:14px; line-height:1.4; }
+    .smartguard { background:#e8f0fe; border:1px solid #c7d2fe; padding:12px; border-radius:10px; margin-top:12px; font-size:14px; line-height:1.4; }
+    label { font-weight:bold; display:block; margin-top:14px; margin-bottom:6px; }
+    input, textarea, button { width:100%; box-sizing:border-box; font-size:16px; }
+    input, textarea { padding:10px; border:1px solid #ccc; border-radius:8px; }
+    textarea { min-height:90px; }
+    button { margin-top:12px; padding:14px; border:none; border-radius:10px; background:#1a73e8; color:#fff; font-weight:bold; cursor:pointer; }
+    button.photo { background:#0b8043; }
+    button.secondary { background:#444; }
+    button.favorite { background:#7b3fe4; }
+    button.danger { background:#9b1c1c; }
+    button:disabled { background:#9bbce8; cursor:not-allowed; }
+    img { max-width:100%; margin-top:12px; border-radius:10px; display:none; }
+    .settings,.panel,.history { margin-top:18px; padding:12px; background:#f7f7f7; border-radius:10px; font-size:14px; }
+    .result { margin-top:20px; padding:14px; background:#eef7ee; border:1px solid #b9dfb9; border-radius:10px; display:none; scroll-margin-top:20px; }
+    .error { margin-top:20px; padding:14px; background:#fdecea; border:1px solid #f5c2c0; border-radius:10px; display:none; }
+    .food-item,.history-item,.favorite-item { padding:8px; margin-top:8px; background:#fff; border-radius:8px; border:1px solid #ddd; }
+    .debug { margin-top:20px; padding:12px; background:#111; color:#0f0; border-radius:10px; font-family:monospace; font-size:13px; white-space:pre-wrap; min-height:100px; max-height:260px; overflow:auto; }
+    .small { font-size:13px; color:#555; line-height:1.4; }
+    .statusBox { margin-top:12px; padding:10px; border-radius:10px; background:#eef2ff; border:1px solid #c7d2fe; display:none; font-size:14px; }
+    .carbMain { font-size:52px; line-height:1; font-weight:800; margin:10px 0; }
+    .foodMain { font-size:22px; font-weight:700; margin:6px 0 10px; }
+    .twoCol { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media(max-width:650px){ .twoCol{grid-template-columns:1fr;} .carbMain{font-size:46px;} }
+    iframe { display:none; width:0; height:0; border:0; }
   </style>
 </head>
-
 <body>
   <div class="container">
     <h1>Meal Carb Helper</h1>
-
-    <div class="warning">
-      <strong>Safety:</strong> This app estimates the carbs to enter into your MiniMed 780G.
-      It can be wrong. Verify before dosing. Your pump/SmartGuard calculates the actual insulin dose.
-    </div>
+    <div class="warning"><strong>Safety:</strong> This app estimates the carbs to enter into your MiniMed 780G. It can be wrong. Verify before dosing. Your pump/SmartGuard calculates the actual insulin dose.</div>
 
     <button id="testBackendBtn" class="secondary">Test Backend</button>
 
@@ -239,14 +47,8 @@
     <img id="preview" alt="Meal preview" />
 
     <div class="twoCol">
-      <div>
-        <label for="currentBG">Current BG / Sensor Glucose</label>
-        <input type="number" id="currentBG" placeholder="Optional, example: 145" />
-      </div>
-      <div>
-        <label for="activeInsulin">Active Insulin / IOB</label>
-        <input type="number" id="activeInsulin" step="0.1" placeholder="Optional, example: 1.2" />
-      </div>
+      <div><label for="currentBG">Current BG / Sensor Glucose</label><input type="number" id="currentBG" placeholder="Optional, example: 145" /></div>
+      <div><label for="activeInsulin">Active Insulin / IOB</label><input type="number" id="activeInsulin" step="0.1" placeholder="Optional, example: 1.2" /></div>
     </div>
 
     <label for="notes">Food Notes</label>
@@ -262,8 +64,7 @@
     <div class="settings">
       <strong>MiniMed 780G workflow:</strong><br>
       Main output = <strong>carbs to enter into pump</strong>.<br>
-      Your pump/SmartGuard calculates actual bolus using your settings, sensor/BG, insulin-on-board, and algorithm behavior.<br>
-      Reference insulin math shown below is optional only.
+      Your pump/SmartGuard calculates actual bolus using your settings, sensor/BG, insulin-on-board, and algorithm behavior.
     </div>
 
     <div id="result" class="result"></div>
@@ -271,810 +72,348 @@
 
     <div class="panel">
       <h3>Manual carb correction / Save Favorite</h3>
-      <p class="small">
-        Use this when the app identifies the food but the carb count is off.
-        Example: change a Hershey Kiss from 5g to 3.6g and save it.
-      </p>
-
+      <p class="small">Use this when the app identifies the food but the carb count is off.</p>
       <label for="manualCarbs">Corrected Carbs</label>
       <input type="number" id="manualCarbs" step="0.1" placeholder="Example: 3.6" />
-
       <label for="favoriteName">Favorite Name</label>
       <input type="text" id="favoriteName" placeholder="Example: 1 Hershey Kiss" />
-
       <button id="updateDisplayBtn" class="secondary">Update Display With Corrected Carbs</button>
       <button id="saveFavoriteBtn" class="favorite">Save Current Meal to Favorites</button>
     </div>
 
-    <div class="panel">
-      <h3>Favorites</h3>
-      <div id="favoritesList">No favorites loaded yet.</div>
-    </div>
+    <div class="panel"><h3>Favorites</h3><div id="favoritesList">No favorites loaded yet.</div></div>
 
     <h3>Debug Log</h3>
     <div id="debug" class="debug">Ready.</div>
 
-    <div class="history">
-      <h3>Local History</h3>
-      <div id="historyList">No local history yet.</div>
-      <button id="clearHistoryBtn" class="danger">Clear Local History</button>
-    </div>
-
-    <div class="history">
-      <h3>Recent Sheet History</h3>
-      <div id="sheetHistoryList">No Sheet history loaded yet.</div>
-    </div>
-
+    <div class="history"><h3>Local History</h3><div id="historyList">No local history yet.</div><button id="clearHistoryBtn" class="danger">Clear Local History</button></div>
+    <div class="history"><h3>Recent Sheet History</h3><div id="sheetHistoryList">No Sheet history loaded yet.</div></div>
     <iframe id="uploadFrame" name="uploadFrame"></iframe>
   </div>
 
-  <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzfu6LCnLa62reNsZ3FhgjsNkj9upp76y8D6VovR7vfxnv1MSTW5xHDNmo7hTR_0IOpfQ/exec";
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzfu6LCnLa62reNsZ3FhgjsNkj9upp76y8D6VovR7vfxnv1MSTW5xHDNmo7hTR_0IOpfQ/exec";
 
-    const els = {
-      photoInput: document.getElementById("photoInput"),
-      preview: document.getElementById("preview"),
-      testBackendBtn: document.getElementById("testBackendBtn"),
-      textOnlyBtn: document.getElementById("textOnlyBtn"),
-      photoBtn: document.getElementById("photoBtn"),
-      sheetHistoryBtn: document.getElementById("sheetHistoryBtn"),
-      loadFavoritesBtn: document.getElementById("loadFavoritesBtn"),
-      resultDiv: document.getElementById("result"),
-      errorDiv: document.getElementById("error"),
-      debugDiv: document.getElementById("debug"),
-      historyList: document.getElementById("historyList"),
-      sheetHistoryList: document.getElementById("sheetHistoryList"),
-      favoritesList: document.getElementById("favoritesList"),
-      clearHistoryBtn: document.getElementById("clearHistoryBtn"),
-      statusBox: document.getElementById("statusBox"),
-      manualCarbs: document.getElementById("manualCarbs"),
-      favoriteName: document.getElementById("favoriteName"),
-      updateDisplayBtn: document.getElementById("updateDisplayBtn"),
-      saveFavoriteBtn: document.getElementById("saveFavoriteBtn")
-    };
+const $ = id => document.getElementById(id);
+const els = {
+  photoInput:$("photoInput"), preview:$("preview"), testBackendBtn:$("testBackendBtn"), textOnlyBtn:$("textOnlyBtn"), photoBtn:$("photoBtn"),
+  sheetHistoryBtn:$("sheetHistoryBtn"), loadFavoritesBtn:$("loadFavoritesBtn"), resultDiv:$("result"), errorDiv:$("error"), debugDiv:$("debug"),
+  historyList:$("historyList"), sheetHistoryList:$("sheetHistoryList"), favoritesList:$("favoritesList"), clearHistoryBtn:$("clearHistoryBtn"),
+  statusBox:$("statusBox"), manualCarbs:$("manualCarbs"), favoriteName:$("favoriteName"), updateDisplayBtn:$("updateDisplayBtn"), saveFavoriteBtn:$("saveFavoriteBtn")
+};
 
-    let selectedBase64 = "";
-    let selectedPhotoReady = false;
-    let currentResult = null;
-    let pollingActive = false;
+let selectedBase64 = "";
+let selectedPhotoReady = false;
+let currentResult = null;
 
-    function logDebug(message) {
-      const time = new Date().toLocaleTimeString();
-      els.debugDiv.textContent += "\n[" + time + "] " + message;
-      els.debugDiv.scrollTop = els.debugDiv.scrollHeight;
-    }
+function logDebug(message){ const time = new Date().toLocaleTimeString(); els.debugDiv.textContent += "\\n[" + time + "] " + message; els.debugDiv.scrollTop = els.debugDiv.scrollHeight; }
+function resetMessages(){ els.resultDiv.style.display="none"; els.errorDiv.style.display="none"; els.resultDiv.innerHTML=""; els.errorDiv.innerHTML=""; els.statusBox.style.display="none"; els.statusBox.innerHTML=""; els.debugDiv.textContent="Ready."; }
+function showStatus(message){ els.statusBox.innerHTML=escapeHtml(message); els.statusBox.style.display="block"; }
+function createRequestId(){ return "photo_" + Date.now() + "_" + Math.floor(Math.random()*1000000); }
+function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 
-    function resetMessages() {
-      els.resultDiv.style.display = "none";
-      els.errorDiv.style.display = "none";
-      els.resultDiv.innerHTML = "";
-      els.errorDiv.innerHTML = "";
-      els.statusBox.style.display = "none";
-      els.statusBox.innerHTML = "";
-      els.debugDiv.textContent = "Ready.";
-    }
+function jsonpRequest(params, timeoutMs=90000){
+  return new Promise(function(resolve,reject){
+    const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random()*100000);
+    params.callback = callbackName;
+    params.v = Date.now();
+    const query = Object.keys(params).map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key])).join("&");
+    const script = document.createElement("script");
+    script.src = WEB_APP_URL + "?" + query;
+    const timer = setTimeout(function(){ cleanup(); reject(new Error("JSONP timeout. Apps Script did not respond.")); }, timeoutMs);
+    window[callbackName] = function(data){ cleanup(); resolve(data); };
+    script.onerror = function(){ cleanup(); reject(new Error("JSONP load failed. Apps Script URL may be blocked, wrong, or not deployed as a new version.")); };
+    function cleanup(){ clearTimeout(timer); if(script.parentNode) script.parentNode.removeChild(script); try{ delete window[callbackName]; }catch(e){ window[callbackName]=undefined; } }
+    document.body.appendChild(script);
+  });
+}
 
-    function showStatus(message) {
-      els.statusBox.innerHTML = escapeHtml(message);
-      els.statusBox.style.display = "block";
-    }
-
-    function createRequestId() {
-      return "photo_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
-    }
-
-    function sleep(ms) {
-      return new Promise(function(resolve) {
-        setTimeout(resolve, ms);
-      });
-    }
-
-    function jsonpRequest(params, timeoutMs = 90000) {
-      return new Promise(function(resolve, reject) {
-        const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-
-        params.callback = callbackName;
-        params.v = Date.now();
-
-        const query = Object.keys(params)
-          .map(function(key) {
-            return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
-          })
-          .join("&");
-
-        const script = document.createElement("script");
-        script.src = WEB_APP_URL + "?" + query;
-
-        const timer = setTimeout(function() {
-          cleanup();
-          reject(new Error("JSONP timeout. Apps Script did not respond."));
-        }, timeoutMs);
-
-        window[callbackName] = function(data) {
-          cleanup();
-          resolve(data);
-        };
-
-        script.onerror = function() {
-          cleanup();
-          reject(new Error("JSONP load failed. Apps Script URL may be blocked, wrong, or not deployed as a new version."));
-        };
-
-        function cleanup() {
-          clearTimeout(timer);
-
-          if (script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
-
-          try {
-            delete window[callbackName];
-          } catch (e) {
-            window[callbackName] = undefined;
-          }
-        }
-
-        document.body.appendChild(script);
-      });
-    }
-
-    els.photoInput.addEventListener("change", function () {
-      const file = els.photoInput.files[0];
-
-      if (!file) {
-        return;
-      }
-
-      resetMessages();
+els.photoInput.addEventListener("change", function(){
+  const file = els.photoInput.files[0];
+  if(!file) return;
+  resetMessages();
+  selectedPhotoReady = false; selectedBase64 = "";
+  logDebug("Photo selected: " + file.name + " / " + Math.round(file.size/1024) + " KB");
+  showStatus("Preparing photo...");
+  compressImage(file, 520, 0.45, function(dataUrl){
+    els.preview.src = dataUrl; els.preview.style.display = "block";
+    selectedBase64 = dataUrl.split(",")[1];
+    selectedPhotoReady = true;
+    if(selectedBase64.length > 350000){
       selectedPhotoReady = false;
-      selectedBase64 = "";
-
-      logDebug("Photo selected: " + file.name + " / " + Math.round(file.size / 1024) + " KB");
-      showStatus("Preparing photo...");
-
-      compressImage(file, 520, 0.45, function(dataUrl) {
-        els.preview.src = dataUrl;
-        els.preview.style.display = "block";
-
-        selectedBase64 = dataUrl.split(",")[1];
-        selectedPhotoReady = true;
-
-        if (selectedBase64.length > 350000) {
-          selectedPhotoReady = false;
-          showError("Photo is still too large after compression. Retake the photo farther back, with less zoom, or use a simpler photo.");
-          logDebug("Compressed image is too large: " + selectedBase64.length);
-          return;
-        }
-
-        logDebug("Photo compressed and loaded.");
-        logDebug("Base64 length: " + selectedBase64.length);
-        showStatus("Photo ready. Add notes if helpful, then tap Analyze Meal Photo.");
-      });
-    });
-
-    els.testBackendBtn.addEventListener("click", async function () {
-      resetMessages();
-      logDebug("Testing backend with JSONP health check...");
-
-      els.testBackendBtn.disabled = true;
-      els.testBackendBtn.textContent = "Testing...";
-
-      try {
-        const data = await jsonpRequest({}, 30000);
-
-        logDebug("JSONP backend response received.");
-
-        if (!data.success) {
-          throw new Error(data.error || "Backend returned success:false.");
-        }
-
-        showStatus("Backend running: " + data.time);
-
-      } catch (err) {
-        showError(err.message);
-        logDebug("Backend test error: " + err.message);
-      } finally {
-        els.testBackendBtn.disabled = false;
-        els.testBackendBtn.textContent = "Test Backend";
-      }
-    });
-
-    els.textOnlyBtn.addEventListener("click", async function () {
-      resetMessages();
-
-      const notes = document.getElementById("notes").value.trim();
-      const currentBG = document.getElementById("currentBG").value || "0";
-      const activeInsulin = document.getElementById("activeInsulin").value || "0";
-
-      if (!notes) {
-        showError("Type food notes first. Example: 14 Ritz crackers.");
-        return;
-      }
-
-      els.textOnlyBtn.disabled = true;
-      els.textOnlyBtn.textContent = "Estimating Text...";
-
-      try {
-        logDebug("Starting text-only estimate.");
-
-        const data = await jsonpRequest({
-          action: "estimateText",
-          notes: notes,
-          currentBG: currentBG,
-          activeInsulin: activeInsulin
-        }, 90000);
-
-        if (!data.success) {
-          throw new Error(data.error || "Backend returned success:false.");
-        }
-
-        showResult(data);
-        saveLocalHistory("Text", notes, data);
-
-      } catch (err) {
-        showError(err.message);
-        logDebug("Text-only error: " + err.message);
-      } finally {
-        els.textOnlyBtn.disabled = false;
-        els.textOnlyBtn.textContent = "Text-Only Estimate";
-      }
-    });
-
-    els.photoBtn.addEventListener("click", function () {
-      resetMessages();
-
-      const notes = document.getElementById("notes").value.trim();
-      const currentBG = document.getElementById("currentBG").value || "0";
-      const activeInsulin = document.getElementById("activeInsulin").value || "0";
-
-      if (!selectedPhotoReady || !selectedBase64) {
-        showError("Please upload or take a meal photo first.");
-        return;
-      }
-
-      if (pollingActive) {
-        showError("A photo analysis is already running. Wait for it to finish.");
-        return;
-      }
-
-      const requestId = createRequestId();
-
-      els.photoBtn.disabled = true;
-      els.photoBtn.textContent = "Submitting Photo...";
-
-      logDebug("Starting photo workflow. Request ID: " + requestId);
-      logDebug("Image base64 length: " + selectedBase64.length);
-      showStatus("Submitting photo for analysis...");
-
-      submitPhotoViaHiddenForm({
-        requestId: requestId,
-        imageBase64: selectedBase64,
-        notes: notes,
-        currentBG: currentBG,
-        activeInsulin: activeInsulin
-      });
-
-      startPollingForPhotoResult(requestId, notes);
-    });
-
-    function submitPhotoViaHiddenForm(payload) {
-      const form = document.createElement("form");
-
-      form.method = "POST";
-      form.action = WEB_APP_URL;
-      form.target = "uploadFrame";
-      form.style.display = "none";
-      form.enctype = "application/x-www-form-urlencoded";
-
-      addHiddenField(form, "action", "submitPhoto");
-      addHiddenField(form, "requestId", payload.requestId);
-      addHiddenField(form, "imageBase64", payload.imageBase64);
-      addHiddenField(form, "notes", payload.notes);
-      addHiddenField(form, "currentBG", payload.currentBG);
-      addHiddenField(form, "activeInsulin", payload.activeInsulin);
-
-      document.body.appendChild(form);
-      form.submit();
-
-      setTimeout(function() {
-        if (form.parentNode) {
-          form.parentNode.removeChild(form);
-        }
-      }, 5000);
+      showError("Photo is still too large after compression. Retake it from a little farther back.");
+      logDebug("Compressed image is too large: " + selectedBase64.length);
+      return;
     }
+    logDebug("Photo compressed and loaded.");
+    logDebug("Base64 length: " + selectedBase64.length);
+    showStatus("Photo ready. Add notes if helpful, then tap Analyze Meal Photo.");
+  });
+});
 
-    function addHiddenField(form, name, value) {
-      const input = document.createElement("textarea");
-      input.name = name;
-      input.value = value;
-      input.style.display = "none";
-      form.appendChild(input);
+els.testBackendBtn.addEventListener("click", async function(){
+  resetMessages(); logDebug("Testing backend with JSONP health check...");
+  els.testBackendBtn.disabled = true; els.testBackendBtn.textContent = "Testing...";
+  try{
+    const data = await jsonpRequest({},30000);
+    if(!data.success) throw new Error(data.error || "Backend returned success:false.");
+    showStatus("Backend running: " + data.time);
+  }catch(err){ showError(err.message); logDebug("Backend test error: " + err.message); }
+  finally{ els.testBackendBtn.disabled=false; els.testBackendBtn.textContent="Test Backend"; }
+});
+
+els.textOnlyBtn.addEventListener("click", async function(){
+  resetMessages();
+  const notes = $("notes").value.trim();
+  const currentBG = $("currentBG").value || "0";
+  const activeInsulin = $("activeInsulin").value || "0";
+  if(!notes){ showError("Type food notes first. Example: 14 Ritz crackers."); return; }
+  els.textOnlyBtn.disabled = true; els.textOnlyBtn.textContent = "Estimating Text...";
+  try{
+    const data = await jsonpRequest({action:"estimateText", notes, currentBG, activeInsulin},90000);
+    if(!data.success) throw new Error(data.error || "Backend returned success:false.");
+    showResult(data); saveLocalHistory("Text", data);
+  }catch(err){ showError(err.message); logDebug("Text-only error: " + err.message); }
+  finally{ els.textOnlyBtn.disabled=false; els.textOnlyBtn.textContent="Text-Only Estimate"; }
+});
+
+els.photoBtn.addEventListener("click", async function(){
+  resetMessages();
+  const notes = $("notes").value.trim();
+  const currentBG = $("currentBG").value || "0";
+  const activeInsulin = $("activeInsulin").value || "0";
+  if(!selectedPhotoReady || !selectedBase64){ showError("Please upload or take a meal photo first."); return; }
+  const requestId = createRequestId();
+  els.photoBtn.disabled = true; els.photoBtn.textContent = "Submitting Photo...";
+  logDebug("Starting photo workflow.");
+  logDebug("Request ID: " + requestId);
+  logDebug("Image base64 length: " + selectedBase64.length);
+  submitPhotoViaHiddenForm({requestId, imageBase64:selectedBase64, notes, currentBG, activeInsulin});
+  showStatus("Photo submitted. Giving Apps Script a few seconds to receive it...");
+  logDebug("Hidden form submitted. Waiting 8 seconds before first poll.");
+  await startPollingForPhotoResult(requestId);
+});
+
+function submitPhotoViaHiddenForm(payload){
+  const form = document.createElement("form");
+  form.method="POST"; form.action=WEB_APP_URL; form.target="uploadFrame"; form.style.display="none"; form.enctype="application/x-www-form-urlencoded";
+  addHiddenField(form,"action","submitPhoto"); addHiddenField(form,"requestId",payload.requestId); addHiddenField(form,"imageBase64",payload.imageBase64);
+  addHiddenField(form,"notes",payload.notes); addHiddenField(form,"currentBG",payload.currentBG); addHiddenField(form,"activeInsulin",payload.activeInsulin);
+  document.body.appendChild(form); form.submit();
+  setTimeout(()=>{ if(form.parentNode) form.parentNode.removeChild(form); },5000);
+}
+function addHiddenField(form,name,value){ const input=document.createElement("textarea"); input.name=name; input.value=value; input.style.display="none"; form.appendChild(input); }
+
+async function startPollingForPhotoResult(requestId){
+  const maxAttempts = 30;
+  await sleep(8000);
+  for(let attempts=1; attempts<=maxAttempts; attempts++){
+    try{
+      logDebug("Polling photo result. Attempt " + attempts + "/" + maxAttempts);
+      const data = await jsonpRequest({action:"getPhotoResult", requestId},60000);
+      if(!data.success && data.status !== "ERROR") throw new Error(data.error || "Backend returned success:false.");
+      if(data.status === "NOT_FOUND"){
+        if(attempts >= 4) throw new Error("Apps Script never received the photo upload.");
+        showStatus("Photo request not found yet. Waiting..."); await sleep(5000); continue;
+      }
+      if(data.status === "PROCESSING"){ showStatus("Still analyzing photo... attempt " + attempts + "/" + maxAttempts); await sleep(5000); continue; }
+      if(data.status === "ERROR") throw new Error(data.error || "Photo processing failed.");
+      if(data.status === "COMPLETE"){
+        logDebug("Photo result complete.");
+        showStatus("Photo analysis complete.");
+        showResult(data); saveLocalHistory("Photo", data); loadSheetHistory();
+        els.photoBtn.disabled=false; els.photoBtn.textContent="Analyze Meal Photo"; return;
+      }
+    }catch(err){
+      els.photoBtn.disabled=false; els.photoBtn.textContent="Analyze Meal Photo";
+      showError(err.message); logDebug("Photo polling error: " + err.message); return;
     }
+  }
+  els.photoBtn.disabled=false; els.photoBtn.textContent="Analyze Meal Photo";
+  showError("Photo analysis timed out. Try again with a simpler, smaller photo.");
+}
 
-    async function startPollingForPhotoResult(requestId, notes) {
-      const maxAttempts = 30;
+function showResult(data){
+  currentResult = data;
+  const foods = data.foods || [];
+  const mealName = data.mealName || inferMealName(data);
+  const low = data.carbRange && data.carbRange.low !== undefined ? data.carbRange.low : "-";
+  const high = data.carbRange && data.carbRange.high !== undefined ? data.carbRange.high : "-";
+  const reference = data.referenceInsulin || calculateReferenceInsulinClient(Number(data.carbs||0));
 
-      pollingActive = true;
-      showStatus("Photo submitted. Giving Apps Script a few seconds to receive it...");
-      logDebug("Hidden form submitted. Waiting 8 seconds before first poll.");
+  els.manualCarbs.value = data.carbs || "";
+  els.favoriteName.value = mealName;
 
-      await sleep(8000);
+  const foodsHtml = foods.map(food => `
+    <div class="food-item">
+      <strong>${escapeHtml(food.name)}</strong><br>
+      Portion: ${escapeHtml(food.estimated_portion || "Not sure")}<br>
+      Estimated carbs: ${escapeHtml(food.estimated_carbs_g)}g
+    </div>`).join("");
 
-      for (let attempts = 1; attempts <= maxAttempts; attempts++) {
-        try {
-          logDebug("Polling photo result. Attempt " + attempts + "/" + maxAttempts);
+  els.resultDiv.innerHTML = `
+    <h2>Result</h2>
+    <div>Food detected</div>
+    <div class="foodMain">${escapeHtml(mealName)}</div>
+    <div>Carbs to enter into MiniMed</div>
+    <div class="carbMain">${escapeHtml(data.carbs)}g</div>
+    <p><strong>Carb Range:</strong> ${escapeHtml(low)}g – ${escapeHtml(high)}g</p>
+    <p><strong>Overall Confidence:</strong> ${escapeHtml(data.confidence || "")}</p>
+    <p><strong>Food ID Confidence:</strong> ${escapeHtml(data.foodIdConfidence || data.confidence || "")}</p>
+    <p><strong>Carb Estimate Confidence:</strong> ${escapeHtml(data.carbEstimateConfidence || data.confidence || "")}</p>
+    <div class="smartguard"><strong>MiniMed / SmartGuard:</strong><br>Enter the carb grams into your pump. Let the 780G calculate the actual bolus.</div>
+    <p class="small">Reference math only: estimated insulin by app = ${escapeHtml(reference.roundedUnits)}u. Do not use this instead of your pump calculation.</p>
+    <h3>Foods Detected Details</h3>
+    ${foodsHtml || "<p>No foods returned.</p>"}`;
+  els.resultDiv.style.display="block";
+  els.resultDiv.scrollIntoView({behavior:"smooth", block:"start"});
+}
 
-          const data = await jsonpRequest({
-            action: "getPhotoResult",
-            requestId: requestId
-          }, 60000);
+function inferMealName(data){
+  if(data.mealName) return data.mealName;
+  if(data.favoriteName) return data.favoriteName;
+  if(data.foods && data.foods.length) return data.foods.map(f => f.name || "Food").join(" + ");
+  return "Saved Meal";
+}
 
-          if (!data.success && data.status !== "ERROR") {
-            throw new Error(data.error || "Backend returned success:false.");
-          }
+els.updateDisplayBtn.addEventListener("click", function(){
+  if(!currentResult){ showError("No current result to update."); return; }
+  const corrected = Number(els.manualCarbs.value);
+  if(!corrected && corrected !== 0){ showError("Enter a corrected carb amount first."); return; }
+  currentResult.carbs = corrected;
+  currentResult.carbRange = {low: corrected, high: corrected};
+  currentResult.confidence = "manual";
+  currentResult.carbEstimateConfidence = "manual";
+  currentResult.referenceInsulin = calculateReferenceInsulinClient(corrected);
+  showResult(currentResult);
+  showStatus("Display updated with corrected carbs.");
+});
 
-          if (data.status === "NOT_FOUND") {
-            if (attempts >= 4) {
-              throw new Error("Apps Script never received the photo upload. The image payload may be too large, or the deployed Code.gs version may not include submitPhoto.");
-            }
+els.saveFavoriteBtn.addEventListener("click", async function(){
+  if(!currentResult){ showError("No current meal result to save."); return; }
+  const name = els.favoriteName.value.trim() || inferMealName(currentResult);
+  const carbs = Number(els.manualCarbs.value || currentResult.carbs || 0);
+  const low = currentResult.carbRange ? currentResult.carbRange.low : carbs;
+  const high = currentResult.carbRange ? currentResult.carbRange.high : carbs;
+  try{
+    const data = await jsonpRequest({
+      action:"saveFavorite", favoriteName:name, mealName:inferMealName(currentResult), carbs, low, high,
+      confidence:currentResult.confidence || "", referenceUnits:currentResult.referenceInsulin ? currentResult.referenceInsulin.roundedUnits : "",
+      foodsDetected:JSON.stringify(currentResult.foods || []), notes:$("notes").value.trim(), source:currentResult.mode || "app"
+    },30000);
+    if(!data.success) throw new Error(data.error || "Could not save favorite.");
+    showStatus("Saved favorite: " + data.favoriteName + " (" + data.carbs + "g carbs)");
+    loadFavorites();
+  }catch(err){ showError(err.message); }
+});
 
-            showStatus("Photo request not found yet. Waiting...");
-            await sleep(5000);
-            continue;
-          }
+els.loadFavoritesBtn.addEventListener("click", loadFavorites);
+async function loadFavorites(){
+  els.favoritesList.innerHTML="Loading favorites...";
+  try{
+    const data = await jsonpRequest({action:"getFavorites"},30000);
+    if(!data.success) throw new Error(data.error || "Could not load favorites.");
+    renderFavorites(data.favorites || []);
+  }catch(err){ els.favoritesList.innerHTML = "Error loading favorites: " + escapeHtml(err.message); }
+}
+function renderFavorites(favorites){
+  if(!favorites.length){ els.favoritesList.innerHTML="No favorites saved yet."; return; }
+  els.favoritesList.innerHTML = favorites.map(fav => `
+    <div class="favorite-item">
+      <strong>${escapeHtml(fav.favoriteName)}</strong><br>
+      Carbs to enter: <strong>${escapeHtml(fav.carbs)}g</strong><br>
+      Range: ${escapeHtml(fav.low)}g – ${escapeHtml(fav.high)}g<br>
+      Times used: ${escapeHtml(fav.timesUsed || 0)}<br>
+      <button onclick="useFavorite('${escapeHtmlAttr(fav.favoriteId)}')" class="favorite">Use This Favorite</button>
+    </div>`).join("");
+}
+window.useFavorite = async function(favoriteId){
+  try{
+    const data = await jsonpRequest({action:"useFavorite", favoriteId, currentBG:$("currentBG").value||"0", activeInsulin:$("activeInsulin").value||"0"},30000);
+    if(!data.success) throw new Error(data.error || "Could not use favorite.");
+    showResult(data); saveLocalHistory("Favorite", data);
+  }catch(err){ showError(err.message); }
+};
 
-          if (data.status === "PROCESSING") {
-            showStatus("Still analyzing photo... attempt " + attempts + "/" + maxAttempts);
-            await sleep(5000);
-            continue;
-          }
+els.sheetHistoryBtn.addEventListener("click", loadSheetHistory);
+async function loadSheetHistory(){
+  els.sheetHistoryList.innerHTML="Loading Sheet history...";
+  try{
+    const data = await jsonpRequest({action:"history"},30000);
+    if(!data.success) throw new Error(data.error || "Could not load history.");
+    renderSheetHistory(data.meals || []);
+  }catch(err){ els.sheetHistoryList.innerHTML="Error loading Sheet history: " + escapeHtml(err.message); }
+}
 
-          if (data.status === "ERROR") {
-            throw new Error(data.error || "Photo processing failed.");
-          }
+function saveLocalHistory(mode, data){
+  const existing = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
+  existing.unshift({time:new Date().toLocaleString(), mode, mealName:inferMealName(data), carbs:data.carbs, confidence:data.confidence});
+  localStorage.setItem("mealCarbHistory", JSON.stringify(existing.slice(0,20)));
+  renderHistory();
+}
+function renderHistory(){
+  const history = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
+  if(!history.length){ els.historyList.innerHTML="No local history yet."; return; }
+  els.historyList.innerHTML = history.map(item => `
+    <div class="history-item">
+      <strong>${escapeHtml(item.time)}</strong><br>
+      Mode: ${escapeHtml(item.mode)}<br>
+      Meal: ${escapeHtml(item.mealName || "")}<br>
+      Carbs: ${escapeHtml(item.carbs)}g<br>
+      Confidence: ${escapeHtml(item.confidence)}
+    </div>`).join("");
+}
+function renderSheetHistory(meals){
+  if(!meals.length){ els.sheetHistoryList.innerHTML="No logged meals yet."; return; }
+  els.sheetHistoryList.innerHTML = meals.map(item => `
+    <div class="history-item">
+      <strong>${escapeHtml(item.timestamp)}</strong><br>
+      Meal: ${escapeHtml(item.mealName)}<br>
+      Carbs: ${escapeHtml(item.carbs)}g<br>
+      Range: ${escapeHtml(item.low)}g – ${escapeHtml(item.high)}g<br>
+      Reference units: ${escapeHtml(item.referenceUnits || "")}u<br>
+      BG: ${escapeHtml(item.currentBG)}<br>
+      Notes: ${escapeHtml(item.notes)}
+      <button onclick="reuseHistoryMeal('${escapeHtmlAttr(item.mealName)}', '${escapeHtmlAttr(item.carbs)}')" class="secondary">Use This Meal Again</button>
+    </div>`).join("");
+}
+window.reuseHistoryMeal = function(mealName, carbs){
+  currentResult = {mode:"history", mealName, carbs:Number(carbs), carbRange:{low:Number(carbs), high:Number(carbs)}, confidence:"history", foods:[{name:mealName, estimated_portion:"saved history", estimated_carbs_g:Number(carbs)}], referenceInsulin:calculateReferenceInsulinClient(Number(carbs))};
+  showResult(currentResult);
+  showStatus("Loaded from Sheet history.");
+};
 
-          if (data.status === "COMPLETE") {
-            logDebug("Photo result complete.");
-            showStatus("Photo analysis complete.");
+els.clearHistoryBtn.addEventListener("click", function(){ localStorage.removeItem("mealCarbHistory"); renderHistory(); });
 
-            showResult(data);
-            saveLocalHistory("Photo", notes, data);
-            loadSheetHistory();
-
-            finishPhotoWorkflow();
-            return;
-          }
-
-          showStatus("Unknown photo status: " + data.status);
-          await sleep(5000);
-
-        } catch (err) {
-          showError(err.message);
-          logDebug("Photo polling error: " + err.message);
-          finishPhotoWorkflow();
-          return;
-        }
-      }
-
-      showError("Photo analysis timed out. Try again with a simpler, smaller photo.");
-      logDebug("Photo analysis timed out.");
-      finishPhotoWorkflow();
-    }
-
-    function finishPhotoWorkflow() {
-      pollingActive = false;
-      els.photoBtn.disabled = false;
-      els.photoBtn.textContent = "Analyze Meal Photo";
-    }
-
-    els.updateDisplayBtn.addEventListener("click", function() {
-      if (!currentResult) {
-        showError("No current result to update.");
-        return;
-      }
-
-      const corrected = Number(els.manualCarbs.value);
-
-      if (Number.isNaN(corrected)) {
-        showError("Enter a corrected carb amount first.");
-        return;
-      }
-
-      currentResult.carbs = corrected;
-      currentResult.carbRange = {
-        low: corrected,
-        high: corrected
-      };
-      currentResult.confidence = "manual";
-      currentResult.carbEstimateConfidence = "manual";
-      currentResult.referenceInsulin = calculateReferenceInsulinClient(corrected);
-
-      showResult(currentResult);
-      showStatus("Display updated with corrected carbs. Enter this carb amount into your pump if it matches what you are eating.");
-    });
-
-    els.saveFavoriteBtn.addEventListener("click", async function() {
-      if (!currentResult) {
-        showError("No current meal result to save.");
-        return;
-      }
-
-      const name = els.favoriteName.value.trim() || inferFavoriteName(currentResult);
-      const carbs = Number(els.manualCarbs.value || currentResult.carbs || 0);
-      const low = currentResult.carbRange ? currentResult.carbRange.low : carbs;
-      const high = currentResult.carbRange ? currentResult.carbRange.high : carbs;
-      const foodsDetected = JSON.stringify(currentResult.foods || []);
-      const notes = document.getElementById("notes").value.trim();
-
-      try {
-        const data = await jsonpRequest({
-          action: "saveFavorite",
-          favoriteName: name,
-          mealName: inferFavoriteName(currentResult),
-          carbs: carbs,
-          low: low,
-          high: high,
-          confidence: currentResult.confidence || "",
-          referenceUnits: currentResult.referenceInsulin ? currentResult.referenceInsulin.roundedUnits : "",
-          foodsDetected: foodsDetected,
-          notes: notes,
-          source: currentResult.mode || "app"
-        }, 30000);
-
-        if (!data.success) {
-          throw new Error(data.error || "Could not save favorite.");
-        }
-
-        showStatus("Saved favorite: " + data.favoriteName + " (" + data.carbs + "g carbs)");
-        loadFavorites();
-
-      } catch (err) {
-        showError(err.message);
-      }
-    });
-
-    els.loadFavoritesBtn.addEventListener("click", loadFavorites);
-
-    async function loadFavorites() {
-      els.favoritesList.innerHTML = "Loading favorites...";
-
-      try {
-        const data = await jsonpRequest({
-          action: "getFavorites"
-        }, 30000);
-
-        if (!data.success) {
-          throw new Error(data.error || "Could not load favorites.");
-        }
-
-        renderFavorites(data.favorites || []);
-
-      } catch (err) {
-        els.favoritesList.innerHTML = "Error loading favorites: " + escapeHtml(err.message);
-      }
-    }
-
-    function renderFavorites(favorites) {
-      if (!favorites.length) {
-        els.favoritesList.innerHTML = "No favorites saved yet.";
-        return;
-      }
-
-      els.favoritesList.innerHTML = favorites.map(function(fav) {
-        return `
-          <div class="favorite-item">
-            <strong>${escapeHtml(fav.favoriteName)}</strong><br>
-            Carbs to enter: <strong>${escapeHtml(fav.carbs)}g</strong><br>
-            Range: ${escapeHtml(fav.low)}g – ${escapeHtml(fav.high)}g<br>
-            Times used: ${escapeHtml(fav.timesUsed || 0)}<br>
-            <button onclick="useFavorite('${escapeHtmlAttr(fav.favoriteId)}')" class="favorite">Use This Favorite</button>
-          </div>
-        `;
-      }).join("");
-    }
-
-    window.useFavorite = async function(favoriteId) {
-      const currentBG = document.getElementById("currentBG").value || "0";
-      const activeInsulin = document.getElementById("activeInsulin").value || "0";
-
-      try {
-        const data = await jsonpRequest({
-          action: "useFavorite",
-          favoriteId: favoriteId,
-          currentBG: currentBG,
-          activeInsulin: activeInsulin
-        }, 30000);
-
-        if (!data.success) {
-          throw new Error(data.error || "Could not use favorite.");
-        }
-
-        showResult(data);
-        saveLocalHistory("Favorite", data.favoriteName || data.mealName || "", data);
-        showStatus("Favorite loaded. Main number is carbs to enter into your pump.");
-
-      } catch (err) {
-        showError(err.message);
-      }
+function calculateReferenceInsulinClient(carbs){
+  const currentBG = Number($("currentBG").value || 0);
+  const activeInsulin = Number($("activeInsulin").value || 0);
+  const carbUnits = carbs / 15;
+  const correctionUnits = currentBG > 100 ? (currentBG - 100) / 45 : 0;
+  return {roundedUnits: Math.round(Math.max(carbUnits + correctionUnits - activeInsulin, 0) * 10) / 10};
+}
+function showError(message){ els.errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(message)}`; els.errorDiv.style.display="block"; }
+function compressImage(file,maxWidth,quality,callback){
+  const reader = new FileReader();
+  reader.onload = function(event){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement("canvas");
+      let width = img.width, height = img.height;
+      if(width > maxWidth){ height = Math.round(height * (maxWidth / width)); width = maxWidth; }
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img,0,0,width,height);
+      callback(canvas.toDataURL("image/jpeg",quality));
     };
-
-    els.sheetHistoryBtn.addEventListener("click", loadSheetHistory);
-
-    async function loadSheetHistory() {
-      els.sheetHistoryList.innerHTML = "Loading Sheet history...";
-      logDebug("Loading Sheet history...");
-
-      try {
-        const data = await jsonpRequest({
-          action: "history"
-        }, 30000);
-
-        if (!data.success) {
-          throw new Error(data.error || "Could not load history.");
-        }
-
-        renderSheetHistory(data.meals || []);
-
-      } catch (err) {
-        els.sheetHistoryList.innerHTML = "Error loading Sheet history: " + escapeHtml(err.message);
-      }
-    }
-
-    function showResult(data) {
-      currentResult = data;
-
-      const foods = data.foods || [];
-      const low = data.carbRange && data.carbRange.low !== undefined ? data.carbRange.low : "-";
-      const high = data.carbRange && data.carbRange.high !== undefined ? data.carbRange.high : "-";
-      const reference = data.referenceInsulin || calculateReferenceInsulinClient(Number(data.carbs || 0));
-      const mealTitle = inferFavoriteName(data);
-
-      els.manualCarbs.value = data.carbs || "";
-      els.favoriteName.value = mealTitle;
-
-      const foodsHtml = foods.map(function (food) {
-        return `
-          <div class="food-item">
-            <strong>${escapeHtml(food.name)}</strong><br>
-            Portion: ${escapeHtml(food.estimated_portion || "Not sure")}<br>
-            Estimated carbs: ${escapeHtml(food.estimated_carbs_g)}g
-          </div>
-        `;
-      }).join("");
-
-      els.resultDiv.innerHTML = `
-        <h2>Result</h2>
-
-        <div class="resultTopLabel">Food detected</div>
-        <div class="foodNameMain">${escapeHtml(mealTitle)}</div>
-
-        <div class="resultTopLabel">Carbs to enter into MiniMed</div>
-        <div class="carbMain">${escapeHtml(data.carbs)}g</div>
-
-        <p><strong>Carb Range:</strong> ${escapeHtml(low)}g – ${escapeHtml(high)}g</p>
-        <p><strong>Overall Confidence:</strong> ${escapeHtml(data.confidence || "")}</p>
-        <p><strong>Food ID Confidence:</strong> ${escapeHtml(data.foodIdConfidence || data.confidence || "")}</p>
-        <p><strong>Carb Estimate Confidence:</strong> ${escapeHtml(data.carbEstimateConfidence || data.confidence || "")}</p>
-
-        <div class="smartguard">
-          <strong>MiniMed / SmartGuard:</strong><br>
-          Enter the carb grams into your pump. Let the 780G calculate the actual bolus.
-          SmartGuard may adjust delivery after the meal based on sensor glucose, insulin-on-board, and algorithm behavior.
-        </div>
-
-        <p class="small">
-          Reference math only: estimated insulin by app = ${escapeHtml(reference.roundedUnits)}u.
-          Do not use this instead of your pump calculation.
-        </p>
-
-        <h3>Foods Detected Details</h3>
-        ${foodsHtml || "<p>No foods returned.</p>"}
-      `;
-
-      els.resultDiv.style.display = "block";
-      scrollToResult();
-    }
-
-    function scrollToResult() {
-      setTimeout(function() {
-        els.resultDiv.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 150);
-    }
-
-    function calculateReferenceInsulinClient(carbs) {
-      const currentBG = Number(document.getElementById("currentBG").value || 0);
-      const activeInsulin = Number(document.getElementById("activeInsulin").value || 0);
-      const carbUnits = carbs / 15;
-      const correctionUnits = currentBG > 100 ? (currentBG - 100) / 45 : 0;
-      const adjusted = Math.max(carbUnits + correctionUnits - activeInsulin, 0);
-
-      return {
-        carbUnits: Math.round(carbUnits * 10) / 10,
-        correctionUnits: Math.round(correctionUnits * 10) / 10,
-        activeInsulinSubtracted: activeInsulin,
-        roundedUnits: Math.round(adjusted * 10) / 10
-      };
-    }
-
-    function inferFavoriteName(data) {
-      if (data.favoriteName) return data.favoriteName;
-      if (data.mealName) return data.mealName;
-      if (data.foods && data.foods.length && data.foods[0].name) return data.foods[0].name;
-      return "Saved Meal";
-    }
-
-    function showError(message) {
-      els.errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(message)}`;
-      els.errorDiv.style.display = "block";
-    }
-
-    function saveLocalHistory(mode, notes, data) {
-      const existing = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
-
-      existing.unshift({
-        time: new Date().toLocaleString(),
-        mode: mode,
-        notes: notes,
-        carbs: data.carbs,
-        confidence: data.confidence
-      });
-
-      localStorage.setItem("mealCarbHistory", JSON.stringify(existing.slice(0, 20)));
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const history = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
-
-      if (!history.length) {
-        els.historyList.innerHTML = "No local history yet.";
-        return;
-      }
-
-      els.historyList.innerHTML = history.map(function (item) {
-        return `
-          <div class="history-item">
-            <strong>${escapeHtml(item.time)}</strong><br>
-            Mode: ${escapeHtml(item.mode)}<br>
-            Notes: ${escapeHtml(item.notes)}<br>
-            Carbs: ${escapeHtml(item.carbs)}g<br>
-            Confidence: ${escapeHtml(item.confidence)}
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderSheetHistory(meals) {
-      if (!meals.length) {
-        els.sheetHistoryList.innerHTML = "No logged meals yet.";
-        return;
-      }
-
-      els.sheetHistoryList.innerHTML = meals.map(function (item) {
-        const payload = encodeURIComponent(JSON.stringify({
-          mealName: item.mealName || "Saved meal",
-          carbs: item.carbs || 0,
-          low: item.low || item.carbs || 0,
-          high: item.high || item.carbs || 0,
-          confidence: item.confidence || "history",
-          notes: item.notes || ""
-        }));
-
-        return `
-          <div class="history-item">
-            <strong>${escapeHtml(item.timestamp)}</strong><br>
-            Meal: ${escapeHtml(item.mealName)}<br>
-            Carbs: ${escapeHtml(item.carbs)}g<br>
-            Range: ${escapeHtml(item.low)}g – ${escapeHtml(item.high)}g<br>
-            Reference units: ${escapeHtml(item.referenceUnits || "")}u<br>
-            BG: ${escapeHtml(item.currentBG)}<br>
-            Notes: ${escapeHtml(item.notes)}
-            <button onclick="useHistoryMeal('${payload}')" class="secondary">Use This Meal Again</button>
-          </div>
-        `;
-      }).join("");
-    }
-
-    window.useHistoryMeal = function(encodedPayload) {
-      try {
-        const item = JSON.parse(decodeURIComponent(encodedPayload));
-
-        const data = {
-          success: true,
-          mode: "history",
-          mealName: item.mealName,
-          carbs: Number(item.carbs || 0),
-          carbRange: {
-            low: Number(item.low || item.carbs || 0),
-            high: Number(item.high || item.carbs || 0)
-          },
-          confidence: item.confidence || "history",
-          foodIdConfidence: "history",
-          carbEstimateConfidence: "history",
-          foods: [
-            {
-              name: item.mealName,
-              estimated_portion: "Saved from history",
-              estimated_carbs_g: Number(item.carbs || 0)
-            }
-          ],
-          notes: item.notes || "",
-          referenceInsulin: calculateReferenceInsulinClient(Number(item.carbs || 0))
-        };
-
-        showResult(data);
-        showStatus("History meal loaded. Main number is carbs to enter into your pump.");
-      } catch (err) {
-        showError("Could not load that history meal: " + err.message);
-      }
-    };
-
-    els.clearHistoryBtn.addEventListener("click", function () {
-      localStorage.removeItem("mealCarbHistory");
-      renderHistory();
-    });
-
-    function compressImage(file, maxWidth, quality, callback) {
-      const reader = new FileReader();
-
-      reader.onload = function(event) {
-        const img = new Image();
-
-        img.onload = function() {
-          const canvas = document.createElement("canvas");
-
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth) {
-            height = Math.round(height * (maxWidth / width));
-            width = maxWidth;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-
-          callback(canvas.toDataURL("image/jpeg", quality));
-        };
-
-        img.onerror = function() {
-          showError("Could not read the selected image.");
-          logDebug("Image load failed.");
-        };
-
-        img.src = event.target.result;
-      };
-
-      reader.onerror = function() {
-        showError("Could not load the selected file.");
-        logDebug("FileReader failed.");
-      };
-
-      reader.readAsDataURL(file);
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function escapeHtmlAttr(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll("'", "&#039;")
-        .replaceAll('"', "&quot;");
-    }
-
-    renderHistory();
-  </script>
+    img.onerror = function(){ showError("Could not read the selected image."); };
+    img.src = event.target.result;
+  };
+  reader.onerror = function(){ showError("Could not load the selected file."); };
+  reader.readAsDataURL(file);
+}
+function escapeHtml(text){ return String(text).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function escapeHtmlAttr(text){ return String(text).replaceAll("'","&#039;").replaceAll('"',"&quot;"); }
+renderHistory();
+</script>
 </body>
 </html>
