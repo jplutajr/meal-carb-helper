@@ -100,7 +100,7 @@
     </div>
 
     <h3>Debug Log</h3>
-    <div id="debug" class="debug">Ready. Version: stable-3</div>
+    <div id="debug" class="debug">Ready. Version: stable-4-timeout-fix</div>
 
     <div class="history">
       <h3>Local History</h3>
@@ -161,7 +161,7 @@ function resetMessages(){
   els.errorDiv.innerHTML="";
   els.statusBox.style.display="none";
   els.statusBox.innerHTML="";
-  els.debugDiv.textContent="Ready. Version: stable-3";
+  els.debugDiv.textContent="Ready. Version: stable-4-timeout-fix";
 }
 
 function showStatus(message){
@@ -177,8 +177,9 @@ function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function jsonpRequest(params, timeoutMs=12000){
+function jsonpRequest(params, timeoutMs=75000){
   return new Promise(function(resolve,reject){
+    const startedAt = Date.now();
     const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random()*100000);
     params.callback = callbackName;
     params.v = Date.now();
@@ -196,6 +197,7 @@ function jsonpRequest(params, timeoutMs=12000){
     }, timeoutMs);
 
     window[callbackName] = function(data){
+      const elapsed = Date.now() - startedAt;
       cleanup();
       resolve(data);
     };
@@ -254,7 +256,7 @@ els.testBackendBtn.addEventListener("click", async function(){
   els.testBackendBtn.textContent = "Testing...";
 
   try{
-    const data = await jsonpRequest({},12000);
+    const data = await jsonpRequest({},75000);
 
     if(!data.success) throw new Error(data.error || "Backend returned success:false.");
 
@@ -336,7 +338,7 @@ els.photoBtn.addEventListener("click", async function(){
       notes,
       currentBG,
       activeInsulin
-    }, 12000);
+    }, 75000);
 
     if (!queued.success) {
       throw new Error(queued.error || "Could not create PhotoQueue row.");
@@ -420,7 +422,7 @@ async function startPollingForPhotoResult(requestId){
       const data = await jsonpRequest({
         action:"getPhotoResult",
         requestId
-      },12000);
+      },75000);
 
       if(data.status === "ERROR"){
         throw new Error(data.error || "Photo processing failed.");
@@ -576,7 +578,7 @@ els.saveFavoriteBtn.addEventListener("click", async function(){
       foodsDetected:JSON.stringify(currentResult.foods || []),
       notes:$("notes").value.trim(),
       source:currentResult.mode || "app"
-    },12000);
+    },75000);
 
     if(!data.success) throw new Error(data.error || "Could not save favorite.");
 
@@ -594,7 +596,7 @@ async function loadFavorites(){
   els.favoritesList.innerHTML="Loading favorites...";
 
   try{
-    const data = await jsonpRequest({action:"getFavorites"},12000);
+    const data = await jsonpRequest({action:"getFavorites"},75000);
 
     if(!data.success) throw new Error(data.error || "Could not load favorites.");
 
@@ -628,7 +630,7 @@ window.useFavorite = async function(favoriteId){
       favoriteId,
       currentBG:$("currentBG").value||"0",
       activeInsulin:$("activeInsulin").value||"0"
-    },12000);
+    },75000);
 
     if(!data.success) throw new Error(data.error || "Could not use favorite.");
 
@@ -646,7 +648,7 @@ async function loadSheetHistory(){
   els.sheetHistoryList.innerHTML="Loading Sheet history...";
 
   try{
-    const data = await jsonpRequest({action:"history"},12000);
+    const data = await jsonpRequest({action:"history"},75000);
 
     if(!data.success) throw new Error(data.error || "Could not load history.");
 
