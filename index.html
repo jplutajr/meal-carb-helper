@@ -244,6 +244,56 @@
       debugDiv.textContent = "Ready.";
     }
 
+    function jsonpRequest(params, timeoutMs = 90000) {
+      return new Promise(function(resolve, reject) {
+        const callbackName =
+          "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+
+        params.callback = callbackName;
+        params.v = Date.now();
+
+        const query = Object.keys(params)
+          .map(function(key) {
+            return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+          })
+          .join("&");
+
+        const script = document.createElement("script");
+        script.src = WEB_APP_URL + "?" + query;
+
+        const timer = setTimeout(function() {
+          cleanup();
+          reject(new Error("JSONP timeout. Apps Script did not respond."));
+        }, timeoutMs);
+
+        window[callbackName] = function(data) {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = function() {
+          cleanup();
+          reject(new Error("JSONP load failed. The Apps Script URL may be blocked, wrong, or not deployed as a new version."));
+        };
+
+        function cleanup() {
+          clearTimeout(timer);
+
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+
+          try {
+            delete window[callbackName];
+          } catch (e) {
+            window[callbackName] = undefined;
+          }
+        }
+
+        document.body.appendChild(script);
+      });
+    }
+
     photoInput.addEventListener("change", function () {
       const file = photoInput.files[0];
 
@@ -264,24 +314,15 @@
 
     testBackendBtn.addEventListener("click", async function () {
       resetMessages();
-      logDebug("Testing backend with GET health check...");
+      logDebug("Testing backend with JSONP health check...");
+
+      testBackendBtn.disabled = true;
+      testBackendBtn.textContent = "Testing...";
 
       try {
-        const response = await fetch(WEB_APP_URL + "?v=" + Date.now(), {
-          method: "GET",
-          redirect: "follow"
-        });
+        const data = await jsonpRequest({}, 30000);
 
-        logDebug("HTTP status: " + response.status);
-        const text = await response.text();
-        logDebug("Raw response first 250 chars: " + text.slice(0, 250));
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          throw new Error("Backend did not return JSON. It returned: " + text.slice(0, 120));
-        }
+        logDebug("JSONP backend response received.");
 
         if (!data.success) {
           throw new Error(data.error || "Backend returned success:false.");
@@ -304,6 +345,9 @@
       } catch (err) {
         showError(err.message);
         logDebug("Backend test error: " + err.message);
+      } finally {
+        testBackendBtn.disabled = false;
+        testBackendBtn.textContent = "Test Backend";
       }
     });
 
@@ -323,35 +367,17 @@
       textOnlyBtn.textContent = "Estimating Text...";
 
       try {
-        logDebug("Starting text-only estimate.");
+        logDebug("Starting text-only JSONP estimate.");
         logDebug("Notes: " + notes);
 
-        const url =
-          WEB_APP_URL +
-          "?action=estimateText" +
-          "&notes=" + encodeURIComponent(notes) +
-          "&currentBG=" + encodeURIComponent(currentBG) +
-          "&activeInsulin=" + encodeURIComponent(activeInsulin) +
-          "&v=" + Date.now();
+        const data = await jsonpRequest({
+          action: "estimateText",
+          notes: notes,
+          currentBG: currentBG,
+          activeInsulin: activeInsulin
+        }, 90000);
 
-        logDebug("Sending GET request.");
-
-        const response = await fetch(url, {
-          method: "GET",
-          redirect: "follow"
-        });
-
-        logDebug("HTTP status: " + response.status);
-
-        const text = await response.text();
-        logDebug("Raw response first 250 chars: " + text.slice(0, 250));
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          throw new Error("Response was not JSON. It returned: " + text.slice(0, 120));
-        }
+        logDebug("Text-only JSONP response received.");
 
         if (!data.success) {
           throw new Error(data.error || "Backend returned success:false.");
@@ -369,70 +395,16 @@
       }
     });
 
-    photoBtn.addEventListener("click", async function () {
+    photoBtn.addEventListener("click", function () {
       resetMessages();
 
       if (!selectedBase64) {
-        showError("Please upload or take a meal photo first, or use Text-Only Estimate.");
-        return;
+        showError("Photo selected? Not yet. But photo mode is still disabled in this GitHub version anyway.");
+      } else {
+        showError("Photo mode cannot reliably run from GitHub Pages yet. Text-only mode uses JSONP and should work first. Once text-only is stable, we need a different upload path for photos.");
       }
 
-      const notes = document.getElementById("notes").value.trim();
-      const currentBG = Number(document.getElementById("currentBG").value || 0);
-      const activeInsulin = Number(document.getElementById("activeInsulin").value || 0);
-
-      photoBtn.disabled = true;
-      photoBtn.textContent = "Analyzing Photo...";
-
-      try {
-        logDebug("Starting photo POST.");
-        logDebug("Base64 length: " + selectedBase64.length);
-
-        const controller = new AbortController();
-        const timeout = setTimeout(function () {
-          controller.abort();
-        }, 60000);
-
-        const response = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            image: selectedBase64,
-            currentBG: currentBG,
-            activeInsulin: activeInsulin,
-            notes: notes
-          }),
-          redirect: "follow",
-          signal: controller.signal
-        });
-
-        clearTimeout(timeout);
-
-        logDebug("HTTP status: " + response.status);
-
-        const text = await response.text();
-        logDebug("Raw response first 250 chars: " + text.slice(0, 250));
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          throw new Error("Photo response was not JSON. It returned: " + text.slice(0, 120));
-        }
-
-        if (!data.success) {
-          throw new Error(data.error || "Backend returned success:false.");
-        }
-
-        showResult(data);
-        saveLocalHistory("Photo", notes, data);
-
-      } catch (err) {
-        showError(err.message);
-        logDebug("Photo error: " + err.message);
-      } finally {
-        photoBtn.disabled = false;
-        photoBtn.textContent = "Analyze Meal Photo";
-      }
+      logDebug("Photo mode blocked intentionally in GitHub version to avoid broken cross-domain POST.");
     });
 
     function showResult(data) {
