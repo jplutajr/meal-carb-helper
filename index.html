@@ -84,7 +84,7 @@
     <div class="panel"><h3>Favorites</h3><div id="favoritesList">No favorites loaded yet.</div></div>
 
     <h3>Debug Log</h3>
-    <div id="debug" class="debug">Ready.</div>
+    <div id="debug" class="debug">Ready. Version: stable-final-2</div>
 
     <div class="history"><h3>Local History</h3><div id="historyList">No local history yet.</div><button id="clearHistoryBtn" class="danger">Clear Local History</button></div>
     <div class="history"><h3>Recent Sheet History</h3><div id="sheetHistoryList">No Sheet history loaded yet.</div></div>
@@ -107,7 +107,7 @@ let selectedPhotoReady = false;
 let currentResult = null;
 
 function logDebug(message){ const time = new Date().toLocaleTimeString(); els.debugDiv.textContent += "\n[" + time + "] " + message; els.debugDiv.scrollTop = els.debugDiv.scrollHeight; }
-function resetMessages(){ els.resultDiv.style.display="none"; els.errorDiv.style.display="none"; els.resultDiv.innerHTML=""; els.errorDiv.innerHTML=""; els.statusBox.style.display="none"; els.statusBox.innerHTML=""; els.debugDiv.textContent="Ready."; }
+function resetMessages(){ els.resultDiv.style.display="none"; els.errorDiv.style.display="none"; els.resultDiv.innerHTML=""; els.errorDiv.innerHTML=""; els.statusBox.style.display="none"; els.statusBox.innerHTML=""; els.debugDiv.textContent="Ready. Version: stable-final-2"; }
 function showStatus(message){ els.statusBox.innerHTML=escapeHtml(message); els.statusBox.style.display="block"; }
 function createRequestId(){ return "photo_" + Date.now() + "_" + Math.floor(Math.random()*1000000); }
 function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
@@ -395,10 +395,13 @@ function calculateReferenceInsulinClient(carbs){
 function friendlyError(message){
   const text = String(message || "");
   if (text.includes("503") || text.includes("UNAVAILABLE") || text.includes("high demand") || text.includes("temporarily overloaded")) {
-    return "Gemini is temporarily overloaded. This is not your app breaking. Wait 60–90 seconds and try again.";
+    return "Gemini is temporarily overloaded. This is not the app breaking. Wait 60–90 seconds and try again.";
   }
   if (text.includes("429") || text.includes("rate-limited") || text.includes("quota")) {
-    return "Gemini is rate-limited right now. Wait at least 60–90 seconds before trying again.";
+    return "Gemini is rate-limited right now. Wait 60–90 seconds before trying again.";
+  }
+  if (text.includes("JSONP timeout")) {
+    return "Backend timed out. First tap Test Backend. If that times out too, Apps Script was not deployed as a new version or GitHub is still loading an old file.";
   }
   return text;
 }
