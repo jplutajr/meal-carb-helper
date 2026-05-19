@@ -16,7 +16,7 @@
     }
 
     .container {
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
       background: #ffffff;
       padding: 18px;
@@ -85,6 +85,10 @@
       background: #444;
     }
 
+    button.danger {
+      background: #9b1c1c;
+    }
+
     button:disabled {
       background: #9bbce8;
       cursor: not-allowed;
@@ -140,7 +144,9 @@
       font-family: monospace;
       font-size: 13px;
       white-space: pre-wrap;
-      min-height: 80px;
+      min-height: 100px;
+      max-height: 260px;
+      overflow: auto;
     }
 
     .history {
@@ -163,6 +169,23 @@
       font-size: 13px;
       color: #555;
       line-height: 1.4;
+    }
+
+    .statusBox {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      display: none;
+      font-size: 14px;
+    }
+
+    iframe {
+      display: none;
+      width: 0;
+      height: 0;
+      border: 0;
     }
   </style>
 </head>
@@ -189,10 +212,13 @@
     <input type="number" id="activeInsulin" step="0.1" placeholder="Example: 1.2" />
 
     <label for="notes">Food Notes</label>
-    <textarea id="notes" placeholder="Example: 14 Ritz crackers, 2 slices pizza, label says 32g carbs, etc."></textarea>
+    <textarea id="notes" placeholder="Example: 14 Ritz crackers, 2 slices pizza, label says 32g carbs, restaurant meal, half plate rice, etc."></textarea>
 
     <button id="textOnlyBtn">Text-Only Estimate</button>
     <button id="photoBtn" class="photo">Analyze Meal Photo</button>
+    <button id="sheetHistoryBtn" class="secondary">Load Recent Sheet History</button>
+
+    <div id="statusBox" class="statusBox"></div>
 
     <div class="settings">
       <strong>Saved pump math:</strong><br>
@@ -211,8 +237,15 @@
     <div class="history">
       <h3>Local History</h3>
       <div id="historyList">No local history yet.</div>
-      <button id="clearHistoryBtn" class="secondary">Clear Local History</button>
+      <button id="clearHistoryBtn" class="danger">Clear Local History</button>
     </div>
+
+    <div class="history">
+      <h3>Recent Sheet History</h3>
+      <div id="sheetHistoryList">No Sheet history loaded yet.</div>
+    </div>
+
+    <iframe id="uploadFrame" name="uploadFrame"></iframe>
   </div>
 
   <script>
@@ -223,17 +256,23 @@
     const testBackendBtn = document.getElementById("testBackendBtn");
     const textOnlyBtn = document.getElementById("textOnlyBtn");
     const photoBtn = document.getElementById("photoBtn");
+    const sheetHistoryBtn = document.getElementById("sheetHistoryBtn");
     const resultDiv = document.getElementById("result");
     const errorDiv = document.getElementById("error");
     const debugDiv = document.getElementById("debug");
     const historyList = document.getElementById("historyList");
+    const sheetHistoryList = document.getElementById("sheetHistoryList");
     const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+    const statusBox = document.getElementById("statusBox");
 
     let selectedBase64 = "";
+    let selectedPhotoReady = false;
+    let activePollTimer = null;
 
     function logDebug(message) {
       const time = new Date().toLocaleTimeString();
       debugDiv.textContent += "\n[" + time + "] " + message;
+      debugDiv.scrollTop = debugDiv.scrollHeight;
     }
 
     function resetMessages() {
@@ -241,7 +280,18 @@
       errorDiv.style.display = "none";
       resultDiv.innerHTML = "";
       errorDiv.innerHTML = "";
+      statusBox.style.display = "none";
+      statusBox.innerHTML = "";
       debugDiv.textContent = "Ready.";
+    }
+
+    function showStatus(message) {
+      statusBox.innerHTML = escapeHtml(message);
+      statusBox.style.display = "block";
+    }
+
+    function createRequestId() {
+      return "photo_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
     }
 
     function jsonpRequest(params, timeoutMs = 90000) {
@@ -273,7 +323,7 @@
 
         script.onerror = function() {
           cleanup();
-          reject(new Error("JSONP load failed. The Apps Script URL may be blocked, wrong, or not deployed as a new version."));
+          reject(new Error("JSONP load failed. Apps Script URL may be blocked, wrong, or not deployed as a new version."));
         };
 
         function cleanup() {
@@ -299,16 +349,23 @@
 
       if (!file) return;
 
-      logDebug("Photo selected: " + file.name + " / " + Math.round(file.size / 1024) + " KB");
+      resetMessages();
+      selectedPhotoReady = false;
+      selectedBase64 = "";
 
-      compressImage(file, 900, 0.72, function(dataUrl) {
+      logDebug("Photo selected: " + file.name + " / " + Math.round(file.size / 1024) + " KB");
+      showStatus("Preparing photo...");
+
+      compressImage(file, 800, 0.62, function(dataUrl) {
         preview.src = dataUrl;
         preview.style.display = "block";
 
         selectedBase64 = dataUrl.split(",")[1];
+        selectedPhotoReady = true;
 
         logDebug("Photo compressed and loaded.");
         logDebug("Base64 length: " + selectedBase64.length);
+        showStatus("Photo ready. Add notes if helpful, then tap Analyze Meal Photo.");
       });
     });
 
@@ -398,14 +455,183 @@
     photoBtn.addEventListener("click", function () {
       resetMessages();
 
-      if (!selectedBase64) {
-        showError("Photo selected? Not yet. But photo mode is still disabled in this GitHub version anyway.");
-      } else {
-        showError("Photo mode cannot reliably run from GitHub Pages yet. Text-only mode uses JSONP and should work first. Once text-only is stable, we need a different upload path for photos.");
+      const notes = document.getElementById("notes").value.trim();
+      const currentBG = document.getElementById("currentBG").value || "0";
+      const activeInsulin = document.getElementById("activeInsulin").value || "0";
+
+      if (!selectedPhotoReady || !selectedBase64) {
+        showError("Please upload or take a meal photo first.");
+        return;
       }
 
-      logDebug("Photo mode blocked intentionally in GitHub version to avoid broken cross-domain POST.");
+      const requestId = createRequestId();
+
+      photoBtn.disabled = true;
+      photoBtn.textContent = "Submitting Photo...";
+
+      logDebug("Starting photo workflow.");
+      logDebug("Request ID: " + requestId);
+      logDebug("Image base64 length: " + selectedBase64.length);
+      showStatus("Submitting photo for analysis...");
+
+      submitPhotoViaHiddenForm({
+        requestId: requestId,
+        imageBase64: selectedBase64,
+        notes: notes,
+        currentBG: currentBG,
+        activeInsulin: activeInsulin
+      });
+
+      showStatus("Photo submitted. Waiting for Gemini analysis...");
+      logDebug("Hidden form submitted. Starting polling.");
+
+      startPollingForPhotoResult(requestId, notes);
     });
+
+    sheetHistoryBtn.addEventListener("click", function () {
+      loadSheetHistory();
+    });
+
+    function submitPhotoViaHiddenForm(payload) {
+      const form = document.createElement("form");
+
+      form.method = "POST";
+      form.action = WEB_APP_URL;
+      form.target = "uploadFrame";
+      form.style.display = "none";
+      form.enctype = "application/x-www-form-urlencoded";
+
+      addHiddenField(form, "action", "submitPhoto");
+      addHiddenField(form, "requestId", payload.requestId);
+      addHiddenField(form, "imageBase64", payload.imageBase64);
+      addHiddenField(form, "notes", payload.notes);
+      addHiddenField(form, "currentBG", payload.currentBG);
+      addHiddenField(form, "activeInsulin", payload.activeInsulin);
+
+      document.body.appendChild(form);
+      form.submit();
+
+      setTimeout(function() {
+        if (form.parentNode) {
+          form.parentNode.removeChild(form);
+        }
+      }, 5000);
+    }
+
+    function addHiddenField(form, name, value) {
+      const input = document.createElement("textarea");
+      input.name = name;
+      input.value = value;
+      input.style.display = "none";
+      form.appendChild(input);
+    }
+
+    function startPollingForPhotoResult(requestId, notes) {
+      let attempts = 0;
+      const maxAttempts = 40;
+
+      if (activePollTimer) {
+        clearInterval(activePollTimer);
+      }
+
+      activePollTimer = setInterval(async function () {
+        attempts += 1;
+
+        try {
+          logDebug("Polling photo result. Attempt " + attempts + "/" + maxAttempts);
+
+          const data = await jsonpRequest({
+            action: "getPhotoResult",
+            requestId: requestId
+          }, 30000);
+
+          if (!data.success && data.status !== "ERROR") {
+            throw new Error(data.error || "Backend returned success:false.");
+          }
+
+          if (data.status === "NOT_FOUND") {
+            showStatus("Photo request not found yet. Waiting...");
+            return;
+          }
+
+          if (data.status === "PROCESSING") {
+            showStatus("Still analyzing photo... attempt " + attempts + "/" + maxAttempts);
+            return;
+          }
+
+          if (data.status === "ERROR") {
+            clearInterval(activePollTimer);
+            activePollTimer = null;
+
+            photoBtn.disabled = false;
+            photoBtn.textContent = "Analyze Meal Photo";
+
+            throw new Error(data.error || "Photo processing failed.");
+          }
+
+          if (data.status === "COMPLETE") {
+            clearInterval(activePollTimer);
+            activePollTimer = null;
+
+            photoBtn.disabled = false;
+            photoBtn.textContent = "Analyze Meal Photo";
+
+            logDebug("Photo result complete.");
+            showStatus("Photo analysis complete.");
+
+            showResult(data);
+            saveLocalHistory("Photo", notes, data);
+            loadSheetHistory();
+            return;
+          }
+
+          showStatus("Unknown photo status: " + data.status);
+
+        } catch (err) {
+          clearInterval(activePollTimer);
+          activePollTimer = null;
+
+          photoBtn.disabled = false;
+          photoBtn.textContent = "Analyze Meal Photo";
+
+          showError(err.message);
+          logDebug("Photo polling error: " + err.message);
+        }
+
+        if (attempts >= maxAttempts) {
+          clearInterval(activePollTimer);
+          activePollTimer = null;
+
+          photoBtn.disabled = false;
+          photoBtn.textContent = "Analyze Meal Photo";
+
+          showError("Photo analysis timed out. Check the Sheet or try again with a smaller/simple photo.");
+          logDebug("Photo analysis timed out.");
+        }
+      }, 4000);
+    }
+
+    async function loadSheetHistory() {
+      sheetHistoryList.innerHTML = "Loading Sheet history...";
+      logDebug("Loading Sheet history...");
+
+      try {
+        const data = await jsonpRequest({
+          action: "history"
+        }, 30000);
+
+        if (!data.success) {
+          throw new Error(data.error || "Could not load history.");
+        }
+
+        renderSheetHistory(data.meals || []);
+        logDebug("Sheet history loaded.");
+
+      } catch (err) {
+        sheetHistoryList.innerHTML = "Error loading Sheet history: " + escapeHtml(err.message);
+        logDebug("Sheet history error: " + err.message);
+      }
+    }
 
     function showResult(data) {
       const foods = data.foods || [];
@@ -420,10 +646,13 @@
         `;
       }).join("");
 
+      const low = data.carbRange && data.carbRange.low !== undefined ? data.carbRange.low : "-";
+      const high = data.carbRange && data.carbRange.high !== undefined ? data.carbRange.high : "-";
+
       resultDiv.innerHTML = `
         <h2>Result</h2>
         <p><strong>Estimated Carbs:</strong> ${escapeHtml(data.carbs)}g</p>
-        <p><strong>Carb Range:</strong> ${escapeHtml(data.carbRange.low)}g – ${escapeHtml(data.carbRange.high)}g</p>
+        <p><strong>Carb Range:</strong> ${escapeHtml(low)}g – ${escapeHtml(high)}g</p>
         <p><strong>Confidence:</strong> ${escapeHtml(data.confidence)}</p>
         <p><strong>Suggested Bolus Estimate:</strong> ${escapeHtml(data.suggestedBolus)} units</p>
         <p class="small">This is calculated using your saved settings. Confirm with your pump/CGM before dosing.</p>
@@ -477,6 +706,27 @@
       }).join("");
     }
 
+    function renderSheetHistory(meals) {
+      if (!meals.length) {
+        sheetHistoryList.innerHTML = "No logged meals yet.";
+        return;
+      }
+
+      sheetHistoryList.innerHTML = meals.map(function (item) {
+        return `
+          <div class="history-item">
+            <strong>${escapeHtml(item.timestamp)}</strong><br>
+            Meal: ${escapeHtml(item.mealName)}<br>
+            Carbs: ${escapeHtml(item.carbs)}g<br>
+            Range: ${escapeHtml(item.low)}g – ${escapeHtml(item.high)}g<br>
+            Bolus: ${escapeHtml(item.suggestedBolus)}u<br>
+            BG: ${escapeHtml(item.currentBG)}<br>
+            Notes: ${escapeHtml(item.notes)}
+          </div>
+        `;
+      }).join("");
+    }
+
     clearHistoryBtn.addEventListener("click", function () {
       localStorage.removeItem("mealCarbHistory");
       renderHistory();
@@ -509,7 +759,17 @@
           callback(compressedDataUrl);
         };
 
+        img.onerror = function() {
+          showError("Could not read the selected image.");
+          logDebug("Image load failed.");
+        };
+
         img.src = event.target.result;
+      };
+
+      reader.onerror = function() {
+        showError("Could not load the selected file.");
+        logDebug("FileReader failed.");
       };
 
       reader.readAsDataURL(file);
