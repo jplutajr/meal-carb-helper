@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Meal Carb Helper</title>
+
   <style>
     body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:16px; color:#222; }
     .container { max-width:800px; margin:0 auto; background:#fff; padding:18px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.08); }
@@ -38,7 +40,11 @@
 <body>
   <div class="container">
     <h1>Meal Carb Helper</h1>
-    <div class="warning"><strong>Safety:</strong> This app estimates the carbs to enter into your MiniMed 780G. It can be wrong. Verify before dosing. Your pump/SmartGuard calculates the actual insulin dose.</div>
+
+    <div class="warning">
+      <strong>Safety:</strong> This app estimates the carbs to enter into your MiniMed 780G. It can be wrong.
+      Verify before dosing. Your pump/SmartGuard calculates the actual insulin dose.
+    </div>
 
     <button id="testBackendBtn" class="secondary">Test Backend</button>
 
@@ -47,8 +53,14 @@
     <img id="preview" alt="Meal preview" />
 
     <div class="twoCol">
-      <div><label for="currentBG">Current BG / Sensor Glucose</label><input type="number" id="currentBG" placeholder="Optional, example: 145" /></div>
-      <div><label for="activeInsulin">Active Insulin / IOB</label><input type="number" id="activeInsulin" step="0.1" placeholder="Optional, example: 1.2" /></div>
+      <div>
+        <label for="currentBG">Current BG / Sensor Glucose</label>
+        <input type="number" id="currentBG" placeholder="Optional, example: 145" />
+      </div>
+      <div>
+        <label for="activeInsulin">Active Insulin / IOB</label>
+        <input type="number" id="activeInsulin" step="0.1" placeholder="Optional, example: 1.2" />
+      </div>
     </div>
 
     <label for="notes">Food Notes</label>
@@ -56,6 +68,7 @@
 
     <button id="textOnlyBtn">Text-Only Estimate</button>
     <button id="photoBtn" class="photo">Analyze Meal Photo</button>
+    <button id="retryPollBtn" class="secondary">Check Last Photo Result</button>
     <button id="sheetHistoryBtn" class="secondary">Load Recent Sheet History</button>
     <button id="loadFavoritesBtn" class="favorite">Load Favorites</button>
 
@@ -81,13 +94,25 @@
       <button id="saveFavoriteBtn" class="favorite">Save Current Meal to Favorites</button>
     </div>
 
-    <div class="panel"><h3>Favorites</h3><div id="favoritesList">No favorites loaded yet.</div></div>
+    <div class="panel">
+      <h3>Favorites</h3>
+      <div id="favoritesList">No favorites loaded yet.</div>
+    </div>
 
     <h3>Debug Log</h3>
-    <div id="debug" class="debug">Ready. Version: stable-final-2</div>
+    <div id="debug" class="debug">Ready. Version: stable-3</div>
 
-    <div class="history"><h3>Local History</h3><div id="historyList">No local history yet.</div><button id="clearHistoryBtn" class="danger">Clear Local History</button></div>
-    <div class="history"><h3>Recent Sheet History</h3><div id="sheetHistoryList">No Sheet history loaded yet.</div></div>
+    <div class="history">
+      <h3>Local History</h3>
+      <div id="historyList">No local history yet.</div>
+      <button id="clearHistoryBtn" class="danger">Clear Local History</button>
+    </div>
+
+    <div class="history">
+      <h3>Recent Sheet History</h3>
+      <div id="sheetHistoryList">No Sheet history loaded yet.</div>
+    </div>
+
     <iframe id="uploadFrame" name="uploadFrame"></iframe>
   </div>
 
@@ -96,34 +121,96 @@ const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzfu6LCnLa62reNsZ3F
 
 const $ = id => document.getElementById(id);
 const els = {
-  photoInput:$("photoInput"), preview:$("preview"), testBackendBtn:$("testBackendBtn"), textOnlyBtn:$("textOnlyBtn"), photoBtn:$("photoBtn"),
-  sheetHistoryBtn:$("sheetHistoryBtn"), loadFavoritesBtn:$("loadFavoritesBtn"), resultDiv:$("result"), errorDiv:$("error"), debugDiv:$("debug"),
-  historyList:$("historyList"), sheetHistoryList:$("sheetHistoryList"), favoritesList:$("favoritesList"), clearHistoryBtn:$("clearHistoryBtn"),
-  statusBox:$("statusBox"), manualCarbs:$("manualCarbs"), favoriteName:$("favoriteName"), updateDisplayBtn:$("updateDisplayBtn"), saveFavoriteBtn:$("saveFavoriteBtn")
+  photoInput:$("photoInput"),
+  preview:$("preview"),
+  testBackendBtn:$("testBackendBtn"),
+  textOnlyBtn:$("textOnlyBtn"),
+  photoBtn:$("photoBtn"),
+  retryPollBtn:$("retryPollBtn"),
+  sheetHistoryBtn:$("sheetHistoryBtn"),
+  loadFavoritesBtn:$("loadFavoritesBtn"),
+  resultDiv:$("result"),
+  errorDiv:$("error"),
+  debugDiv:$("debug"),
+  historyList:$("historyList"),
+  sheetHistoryList:$("sheetHistoryList"),
+  favoritesList:$("favoritesList"),
+  clearHistoryBtn:$("clearHistoryBtn"),
+  statusBox:$("statusBox"),
+  manualCarbs:$("manualCarbs"),
+  favoriteName:$("favoriteName"),
+  updateDisplayBtn:$("updateDisplayBtn"),
+  saveFavoriteBtn:$("saveFavoriteBtn")
 };
 
 let selectedBase64 = "";
 let selectedPhotoReady = false;
 let currentResult = null;
+let lastRequestId = localStorage.getItem("lastPhotoRequestId") || "";
 
-function logDebug(message){ const time = new Date().toLocaleTimeString(); els.debugDiv.textContent += "\n[" + time + "] " + message; els.debugDiv.scrollTop = els.debugDiv.scrollHeight; }
-function resetMessages(){ els.resultDiv.style.display="none"; els.errorDiv.style.display="none"; els.resultDiv.innerHTML=""; els.errorDiv.innerHTML=""; els.statusBox.style.display="none"; els.statusBox.innerHTML=""; els.debugDiv.textContent="Ready. Version: stable-final-2"; }
-function showStatus(message){ els.statusBox.innerHTML=escapeHtml(message); els.statusBox.style.display="block"; }
-function createRequestId(){ return "photo_" + Date.now() + "_" + Math.floor(Math.random()*1000000); }
-function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+function logDebug(message){
+  const time = new Date().toLocaleTimeString();
+  els.debugDiv.textContent += "\n[" + time + "] " + message;
+  els.debugDiv.scrollTop = els.debugDiv.scrollHeight;
+}
 
-function jsonpRequest(params, timeoutMs=90000){
+function resetMessages(){
+  els.resultDiv.style.display="none";
+  els.errorDiv.style.display="none";
+  els.resultDiv.innerHTML="";
+  els.errorDiv.innerHTML="";
+  els.statusBox.style.display="none";
+  els.statusBox.innerHTML="";
+  els.debugDiv.textContent="Ready. Version: stable-3";
+}
+
+function showStatus(message){
+  els.statusBox.innerHTML=escapeHtml(message);
+  els.statusBox.style.display="block";
+}
+
+function createRequestId(){
+  return "photo_" + Date.now() + "_" + Math.floor(Math.random()*1000000);
+}
+
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function jsonpRequest(params, timeoutMs=12000){
   return new Promise(function(resolve,reject){
     const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random()*100000);
     params.callback = callbackName;
     params.v = Date.now();
-    const query = Object.keys(params).map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key])).join("&");
+
+    const query = Object.keys(params)
+      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+      .join("&");
+
     const script = document.createElement("script");
     script.src = WEB_APP_URL + "?" + query;
-    const timer = setTimeout(function(){ cleanup(); reject(new Error("JSONP timeout. Apps Script did not respond.")); }, timeoutMs);
-    window[callbackName] = function(data){ cleanup(); resolve(data); };
-    script.onerror = function(){ cleanup(); reject(new Error("JSONP load failed. Apps Script URL may be blocked, wrong, or not deployed as a new version.")); };
-    function cleanup(){ clearTimeout(timer); if(script.parentNode) script.parentNode.removeChild(script); try{ delete window[callbackName]; }catch(e){ window[callbackName]=undefined; } }
+
+    const timer = setTimeout(function(){
+      cleanup();
+      reject(new Error("JSONP timeout. Apps Script did not respond."));
+    }, timeoutMs);
+
+    window[callbackName] = function(data){
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = function(){
+      cleanup();
+      reject(new Error("JSONP load failed. Apps Script URL may be blocked, wrong, or not deployed as a new version."));
+    };
+
+    function cleanup(){
+      clearTimeout(timer);
+      if(script.parentNode) script.parentNode.removeChild(script);
+      try{ delete window[callbackName]; }catch(e){ window[callbackName]=undefined; }
+    }
+
     document.body.appendChild(script);
   });
 }
@@ -131,20 +218,28 @@ function jsonpRequest(params, timeoutMs=90000){
 els.photoInput.addEventListener("change", function(){
   const file = els.photoInput.files[0];
   if(!file) return;
+
   resetMessages();
-  selectedPhotoReady = false; selectedBase64 = "";
+  selectedPhotoReady = false;
+  selectedBase64 = "";
+
   logDebug("Photo selected: " + file.name + " / " + Math.round(file.size/1024) + " KB");
   showStatus("Preparing photo...");
+
   compressImage(file, 520, 0.45, function(dataUrl){
-    els.preview.src = dataUrl; els.preview.style.display = "block";
+    els.preview.src = dataUrl;
+    els.preview.style.display = "block";
+
     selectedBase64 = dataUrl.split(",")[1];
     selectedPhotoReady = true;
+
     if(selectedBase64.length > 350000){
       selectedPhotoReady = false;
       showError("Photo is still too large after compression. Retake it from a little farther back.");
       logDebug("Compressed image is too large: " + selectedBase64.length);
       return;
     }
+
     logDebug("Photo compressed and loaded.");
     logDebug("Base64 length: " + selectedBase64.length);
     showStatus("Photo ready. Add notes if helpful, then tap Analyze Meal Photo.");
@@ -152,89 +247,245 @@ els.photoInput.addEventListener("change", function(){
 });
 
 els.testBackendBtn.addEventListener("click", async function(){
-  resetMessages(); logDebug("Testing backend with JSONP health check...");
-  els.testBackendBtn.disabled = true; els.testBackendBtn.textContent = "Testing...";
+  resetMessages();
+  logDebug("Testing backend with JSONP health check...");
+
+  els.testBackendBtn.disabled = true;
+  els.testBackendBtn.textContent = "Testing...";
+
   try{
-    const data = await jsonpRequest({},30000);
+    const data = await jsonpRequest({},12000);
+
     if(!data.success) throw new Error(data.error || "Backend returned success:false.");
-    showStatus("Backend running: " + data.time);
-  }catch(err){ showError(err.message); logDebug("Backend test error: " + err.message); }
-  finally{ els.testBackendBtn.disabled=false; els.testBackendBtn.textContent="Test Backend"; }
+
+    showStatus("Backend running: " + (data.version || "") + " " + data.time);
+    logDebug("Backend OK: " + JSON.stringify(data));
+  }catch(err){
+    showError(err.message);
+    logDebug("Backend test error: " + err.message);
+  }finally{
+    els.testBackendBtn.disabled=false;
+    els.testBackendBtn.textContent="Test Backend";
+  }
 });
 
 els.textOnlyBtn.addEventListener("click", async function(){
   resetMessages();
+
   const notes = $("notes").value.trim();
   const currentBG = $("currentBG").value || "0";
   const activeInsulin = $("activeInsulin").value || "0";
-  if(!notes){ showError("Type food notes first. Example: 14 Ritz crackers."); return; }
-  els.textOnlyBtn.disabled = true; els.textOnlyBtn.textContent = "Estimating Text...";
+
+  if(!notes){
+    showError("Type food notes first. Example: 14 Ritz crackers.");
+    return;
+  }
+
+  els.textOnlyBtn.disabled = true;
+  els.textOnlyBtn.textContent = "Estimating Text...";
+
   try{
-    const data = await jsonpRequest({action:"estimateText", notes, currentBG, activeInsulin},90000);
+    const data = await jsonpRequest({
+      action:"estimateText",
+      notes,
+      currentBG,
+      activeInsulin
+    },45000);
+
     if(!data.success) throw new Error(data.error || "Backend returned success:false.");
-    showResult(data); saveLocalHistory("Text", data);
-  }catch(err){ showError(err.message); logDebug("Text-only error: " + err.message); }
-  finally{ els.textOnlyBtn.disabled=false; els.textOnlyBtn.textContent="Text-Only Estimate"; }
+
+    showResult(data);
+    saveLocalHistory("Text", data);
+  }catch(err){
+    showError(err.message);
+    logDebug("Text-only error: " + err.message);
+  }finally{
+    els.textOnlyBtn.disabled=false;
+    els.textOnlyBtn.textContent="Text-Only Estimate";
+  }
 });
 
 els.photoBtn.addEventListener("click", async function(){
   resetMessages();
+
   const notes = $("notes").value.trim();
   const currentBG = $("currentBG").value || "0";
   const activeInsulin = $("activeInsulin").value || "0";
-  if(!selectedPhotoReady || !selectedBase64){ showError("Please upload or take a meal photo first."); return; }
+
+  if(!selectedPhotoReady || !selectedBase64){
+    showError("Please upload or take a meal photo first.");
+    return;
+  }
+
   const requestId = createRequestId();
-  els.photoBtn.disabled = true; els.photoBtn.textContent = "Submitting Photo...";
+  lastRequestId = requestId;
+  localStorage.setItem("lastPhotoRequestId", requestId);
+
+  els.photoBtn.disabled = true;
+  els.photoBtn.textContent = "Submitting Photo...";
+
   logDebug("Starting photo workflow.");
   logDebug("Request ID: " + requestId);
   logDebug("Image base64 length: " + selectedBase64.length);
-  submitPhotoViaHiddenForm({requestId, imageBase64:selectedBase64, notes, currentBG, activeInsulin});
-  showStatus("Photo submitted. Giving Apps Script a few seconds to receive it...");
-  logDebug("Hidden form submitted. Waiting 8 seconds before first poll.");
-  await startPollingForPhotoResult(requestId);
+
+  try {
+    logDebug("Creating PhotoQueue row before upload.");
+    const queued = await jsonpRequest({
+      action: "startPhotoRequest",
+      requestId,
+      notes,
+      currentBG,
+      activeInsulin
+    }, 12000);
+
+    if (!queued.success) {
+      throw new Error(queued.error || "Could not create PhotoQueue row.");
+    }
+
+    logDebug("Queue row created. Submitting hidden form.");
+    submitPhotoViaHiddenForm({
+      requestId,
+      imageBase64:selectedBase64,
+      notes,
+      currentBG,
+      activeInsulin
+    });
+
+    showStatus("Photo queued and submitted. Waiting for analysis...");
+    await startPollingForPhotoResult(requestId);
+
+  } catch (err) {
+    els.photoBtn.disabled=false;
+    els.photoBtn.textContent="Analyze Meal Photo";
+    showError(err.message);
+    logDebug("Photo start error: " + err.message);
+  }
+});
+
+els.retryPollBtn.addEventListener("click", async function(){
+  resetMessages();
+
+  if(!lastRequestId){
+    showError("No previous photo request found.");
+    return;
+  }
+
+  logDebug("Checking last request ID: " + lastRequestId);
+  await startPollingForPhotoResult(lastRequestId);
 });
 
 function submitPhotoViaHiddenForm(payload){
   const form = document.createElement("form");
-  form.method="POST"; form.action=WEB_APP_URL; form.target="uploadFrame"; form.style.display="none"; form.enctype="application/x-www-form-urlencoded";
-  addHiddenField(form,"action","submitPhoto"); addHiddenField(form,"requestId",payload.requestId); addHiddenField(form,"imageBase64",payload.imageBase64);
-  addHiddenField(form,"notes",payload.notes); addHiddenField(form,"currentBG",payload.currentBG); addHiddenField(form,"activeInsulin",payload.activeInsulin);
-  document.body.appendChild(form); form.submit();
-  setTimeout(()=>{ if(form.parentNode) form.parentNode.removeChild(form); },5000);
+  form.method="POST";
+  form.action=WEB_APP_URL;
+  form.target="uploadFrame";
+  form.style.display="none";
+  form.enctype="application/x-www-form-urlencoded";
+
+  addHiddenField(form,"action","submitPhoto");
+  addHiddenField(form,"requestId",payload.requestId);
+  addHiddenField(form,"imageBase64",payload.imageBase64);
+  addHiddenField(form,"notes",payload.notes);
+  addHiddenField(form,"currentBG",payload.currentBG);
+  addHiddenField(form,"activeInsulin",payload.activeInsulin);
+
+  document.body.appendChild(form);
+  form.submit();
+
+  setTimeout(()=>{
+    if(form.parentNode) form.parentNode.removeChild(form);
+  },5000);
 }
-function addHiddenField(form,name,value){ const input=document.createElement("textarea"); input.name=name; input.value=value; input.style.display="none"; form.appendChild(input); }
+
+function addHiddenField(form,name,value){
+  const input=document.createElement("textarea");
+  input.name=name;
+  input.value=value;
+  input.style.display="none";
+  form.appendChild(input);
+}
 
 async function startPollingForPhotoResult(requestId){
-  const maxAttempts = 30;
-  await sleep(8000);
+  const maxAttempts = 36;
+
+  els.photoBtn.disabled = true;
+  els.photoBtn.textContent = "Analyzing Photo...";
+
+  await sleep(3000);
+
   for(let attempts=1; attempts<=maxAttempts; attempts++){
     try{
       logDebug("Polling photo result. Attempt " + attempts + "/" + maxAttempts);
-      const data = await jsonpRequest({action:"getPhotoResult", requestId},60000);
-      if(!data.success && data.status !== "ERROR") throw new Error(data.error || "Backend returned success:false.");
-      if(data.status === "NOT_FOUND"){
-        if(attempts >= 4) throw new Error("Apps Script never received the photo upload.");
-        showStatus("Photo request not found yet. Waiting..."); await sleep(5000); continue;
+
+      const data = await jsonpRequest({
+        action:"getPhotoResult",
+        requestId
+      },12000);
+
+      if(data.status === "ERROR"){
+        throw new Error(data.error || "Photo processing failed.");
       }
-      if(data.status === "PROCESSING"){ showStatus("Still analyzing photo... attempt " + attempts + "/" + maxAttempts); await sleep(5000); continue; }
-      if(data.status === "ERROR") throw new Error(data.error || "Photo processing failed.");
+
+      if(!data.success){
+        throw new Error(data.error || "Backend returned success:false.");
+      }
+
+      if(data.status === "QUEUED"){
+        showStatus("Photo request is queued. Waiting for upload to reach Apps Script...");
+        await sleep(4000);
+        continue;
+      }
+
+      if(data.status === "RECEIVED"){
+        showStatus("Photo upload received. Waiting for Gemini analysis...");
+        await sleep(4000);
+        continue;
+      }
+
+      if(data.status === "PROCESSING"){
+        showStatus("Gemini is analyzing the photo... attempt " + attempts + "/" + maxAttempts);
+        await sleep(4000);
+        continue;
+      }
+
+      if(data.status === "NOT_FOUND"){
+        showStatus("Request not found yet. Waiting...");
+        await sleep(4000);
+        continue;
+      }
+
       if(data.status === "COMPLETE"){
         logDebug("Photo result complete.");
         showStatus("Photo analysis complete.");
-        showResult(data); saveLocalHistory("Photo", data); loadSheetHistory();
-        els.photoBtn.disabled=false; els.photoBtn.textContent="Analyze Meal Photo"; return;
+        showResult(data);
+        saveLocalHistory("Photo", data);
+        loadSheetHistory();
+
+        els.photoBtn.disabled=false;
+        els.photoBtn.textContent="Analyze Meal Photo";
+        return;
       }
+
+      showStatus("Unknown status: " + data.status);
+      await sleep(4000);
+
     }catch(err){
-      els.photoBtn.disabled=false; els.photoBtn.textContent="Analyze Meal Photo";
-      showError(err.message); logDebug("Photo polling error: " + err.message); return;
+      els.photoBtn.disabled=false;
+      els.photoBtn.textContent="Analyze Meal Photo";
+      showError(err.message);
+      logDebug("Photo polling error: " + err.message);
+      return;
     }
   }
-  els.photoBtn.disabled=false; els.photoBtn.textContent="Analyze Meal Photo";
-  showError("Photo analysis timed out. Try again with a simpler, smaller photo.");
+
+  els.photoBtn.disabled=false;
+  els.photoBtn.textContent="Analyze Meal Photo";
+  showError("Photo analysis timed out. Tap Check Last Photo Result, or try again in a minute.");
 }
 
 function showResult(data){
   currentResult = data;
+
   const foods = data.foods || [];
   const mealName = data.mealName || inferMealName(data);
   const low = data.carbRange && data.carbRange.low !== undefined ? data.carbRange.low : "-";
@@ -264,7 +515,9 @@ function showResult(data){
     <div class="smartguard"><strong>MiniMed / SmartGuard:</strong><br>Enter the carb grams into your pump. Let the 780G calculate the actual bolus.</div>
     <p class="small">Reference math only: estimated insulin by app = ${escapeHtml(reference.roundedUnits)}u. Do not use this instead of your pump calculation.</p>
     <h3>Foods Detected Details</h3>
-    ${foodsHtml || "<p>No foods returned.</p>"}`;
+    ${foodsHtml || "<p>No foods returned.</p>"}
+  `;
+
   els.resultDiv.style.display="block";
   els.resultDiv.scrollIntoView({behavior:"smooth", block:"start"});
 }
@@ -277,47 +530,87 @@ function inferMealName(data){
 }
 
 els.updateDisplayBtn.addEventListener("click", function(){
-  if(!currentResult){ showError("No current result to update."); return; }
+  if(!currentResult){
+    showError("No current result to update.");
+    return;
+  }
+
   const corrected = Number(els.manualCarbs.value);
-  if(!corrected && corrected !== 0){ showError("Enter a corrected carb amount first."); return; }
+
+  if(!corrected && corrected !== 0){
+    showError("Enter a corrected carb amount first.");
+    return;
+  }
+
   currentResult.carbs = corrected;
   currentResult.carbRange = {low: corrected, high: corrected};
   currentResult.confidence = "manual";
   currentResult.carbEstimateConfidence = "manual";
   currentResult.referenceInsulin = calculateReferenceInsulinClient(corrected);
+
   showResult(currentResult);
   showStatus("Display updated with corrected carbs.");
 });
 
 els.saveFavoriteBtn.addEventListener("click", async function(){
-  if(!currentResult){ showError("No current meal result to save."); return; }
+  if(!currentResult){
+    showError("No current meal result to save.");
+    return;
+  }
+
   const name = els.favoriteName.value.trim() || inferMealName(currentResult);
   const carbs = Number(els.manualCarbs.value || currentResult.carbs || 0);
   const low = currentResult.carbRange ? currentResult.carbRange.low : carbs;
   const high = currentResult.carbRange ? currentResult.carbRange.high : carbs;
+
   try{
     const data = await jsonpRequest({
-      action:"saveFavorite", favoriteName:name, mealName:inferMealName(currentResult), carbs, low, high,
-      confidence:currentResult.confidence || "", referenceUnits:currentResult.referenceInsulin ? currentResult.referenceInsulin.roundedUnits : "",
-      foodsDetected:JSON.stringify(currentResult.foods || []), notes:$("notes").value.trim(), source:currentResult.mode || "app"
-    },30000);
+      action:"saveFavorite",
+      favoriteName:name,
+      mealName:inferMealName(currentResult),
+      carbs,
+      low,
+      high,
+      confidence:currentResult.confidence || "",
+      referenceUnits:currentResult.referenceInsulin ? currentResult.referenceInsulin.roundedUnits : "",
+      foodsDetected:JSON.stringify(currentResult.foods || []),
+      notes:$("notes").value.trim(),
+      source:currentResult.mode || "app"
+    },12000);
+
     if(!data.success) throw new Error(data.error || "Could not save favorite.");
+
     showStatus("Saved favorite: " + data.favoriteName + " (" + data.carbs + "g carbs)");
     loadFavorites();
-  }catch(err){ showError(err.message); }
+
+  }catch(err){
+    showError(err.message);
+  }
 });
 
 els.loadFavoritesBtn.addEventListener("click", loadFavorites);
+
 async function loadFavorites(){
   els.favoritesList.innerHTML="Loading favorites...";
+
   try{
-    const data = await jsonpRequest({action:"getFavorites"},30000);
+    const data = await jsonpRequest({action:"getFavorites"},12000);
+
     if(!data.success) throw new Error(data.error || "Could not load favorites.");
+
     renderFavorites(data.favorites || []);
-  }catch(err){ els.favoritesList.innerHTML = "Error loading favorites: " + escapeHtml(err.message); }
+
+  }catch(err){
+    els.favoritesList.innerHTML = "Error loading favorites: " + escapeHtml(friendlyError(err.message));
+  }
 }
+
 function renderFavorites(favorites){
-  if(!favorites.length){ els.favoritesList.innerHTML="No favorites saved yet."; return; }
+  if(!favorites.length){
+    els.favoritesList.innerHTML="No favorites saved yet.";
+    return;
+  }
+
   els.favoritesList.innerHTML = favorites.map(fav => `
     <div class="favorite-item">
       <strong>${escapeHtml(fav.favoriteName)}</strong><br>
@@ -327,33 +620,66 @@ function renderFavorites(favorites){
       <button onclick="useFavorite('${escapeHtmlAttr(fav.favoriteId)}')" class="favorite">Use This Favorite</button>
     </div>`).join("");
 }
+
 window.useFavorite = async function(favoriteId){
   try{
-    const data = await jsonpRequest({action:"useFavorite", favoriteId, currentBG:$("currentBG").value||"0", activeInsulin:$("activeInsulin").value||"0"},30000);
+    const data = await jsonpRequest({
+      action:"useFavorite",
+      favoriteId,
+      currentBG:$("currentBG").value||"0",
+      activeInsulin:$("activeInsulin").value||"0"
+    },12000);
+
     if(!data.success) throw new Error(data.error || "Could not use favorite.");
-    showResult(data); saveLocalHistory("Favorite", data);
-  }catch(err){ showError(err.message); }
+
+    showResult(data);
+    saveLocalHistory("Favorite", data);
+
+  }catch(err){
+    showError(err.message);
+  }
 };
 
 els.sheetHistoryBtn.addEventListener("click", loadSheetHistory);
+
 async function loadSheetHistory(){
   els.sheetHistoryList.innerHTML="Loading Sheet history...";
+
   try{
-    const data = await jsonpRequest({action:"history"},30000);
+    const data = await jsonpRequest({action:"history"},12000);
+
     if(!data.success) throw new Error(data.error || "Could not load history.");
+
     renderSheetHistory(data.meals || []);
-  }catch(err){ els.sheetHistoryList.innerHTML="Error loading Sheet history: " + escapeHtml(err.message); }
+
+  }catch(err){
+    els.sheetHistoryList.innerHTML="Error loading Sheet history: " + escapeHtml(friendlyError(err.message));
+  }
 }
 
 function saveLocalHistory(mode, data){
   const existing = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
-  existing.unshift({time:new Date().toLocaleString(), mode, mealName:inferMealName(data), carbs:data.carbs, confidence:data.confidence});
+
+  existing.unshift({
+    time:new Date().toLocaleString(),
+    mode,
+    mealName:inferMealName(data),
+    carbs:data.carbs,
+    confidence:data.confidence
+  });
+
   localStorage.setItem("mealCarbHistory", JSON.stringify(existing.slice(0,20)));
   renderHistory();
 }
+
 function renderHistory(){
   const history = JSON.parse(localStorage.getItem("mealCarbHistory") || "[]");
-  if(!history.length){ els.historyList.innerHTML="No local history yet."; return; }
+
+  if(!history.length){
+    els.historyList.innerHTML="No local history yet.";
+    return;
+  }
+
   els.historyList.innerHTML = history.map(item => `
     <div class="history-item">
       <strong>${escapeHtml(item.time)}</strong><br>
@@ -363,8 +689,13 @@ function renderHistory(){
       Confidence: ${escapeHtml(item.confidence)}
     </div>`).join("");
 }
+
 function renderSheetHistory(meals){
-  if(!meals.length){ els.sheetHistoryList.innerHTML="No logged meals yet."; return; }
+  if(!meals.length){
+    els.sheetHistoryList.innerHTML="No logged meals yet.";
+    return;
+  }
+
   els.sheetHistoryList.innerHTML = meals.map(item => `
     <div class="history-item">
       <strong>${escapeHtml(item.timestamp)}</strong><br>
@@ -377,55 +708,115 @@ function renderSheetHistory(meals){
       <button onclick="reuseHistoryMeal('${escapeHtmlAttr(item.mealName)}', '${escapeHtmlAttr(item.carbs)}')" class="secondary">Use This Meal Again</button>
     </div>`).join("");
 }
+
 window.reuseHistoryMeal = function(mealName, carbs){
-  currentResult = {mode:"history", mealName, carbs:Number(carbs), carbRange:{low:Number(carbs), high:Number(carbs)}, confidence:"history", foods:[{name:mealName, estimated_portion:"saved history", estimated_carbs_g:Number(carbs)}], referenceInsulin:calculateReferenceInsulinClient(Number(carbs))};
+  currentResult = {
+    mode:"history",
+    mealName,
+    carbs:Number(carbs),
+    carbRange:{low:Number(carbs), high:Number(carbs)},
+    confidence:"history",
+    foodIdConfidence:"history",
+    carbEstimateConfidence:"history",
+    foods:[{name:mealName, estimated_portion:"saved history", estimated_carbs_g:Number(carbs)}],
+    referenceInsulin:calculateReferenceInsulinClient(Number(carbs))
+  };
+
   showResult(currentResult);
   showStatus("Loaded from Sheet history.");
 };
 
-els.clearHistoryBtn.addEventListener("click", function(){ localStorage.removeItem("mealCarbHistory"); renderHistory(); });
+els.clearHistoryBtn.addEventListener("click", function(){
+  localStorage.removeItem("mealCarbHistory");
+  renderHistory();
+});
 
 function calculateReferenceInsulinClient(carbs){
   const currentBG = Number($("currentBG").value || 0);
   const activeInsulin = Number($("activeInsulin").value || 0);
   const carbUnits = carbs / 15;
   const correctionUnits = currentBG > 100 ? (currentBG - 100) / 45 : 0;
-  return {roundedUnits: Math.round(Math.max(carbUnits + correctionUnits - activeInsulin, 0) * 10) / 10};
+
+  return {
+    roundedUnits: Math.round(Math.max(carbUnits + correctionUnits - activeInsulin, 0) * 10) / 10
+  };
 }
+
 function friendlyError(message){
   const text = String(message || "");
+
   if (text.includes("503") || text.includes("UNAVAILABLE") || text.includes("high demand") || text.includes("temporarily overloaded")) {
     return "Gemini is temporarily overloaded. This is not the app breaking. Wait 60–90 seconds and try again.";
   }
+
   if (text.includes("429") || text.includes("rate-limited") || text.includes("quota")) {
     return "Gemini is rate-limited right now. Wait 60–90 seconds before trying again.";
   }
+
   if (text.includes("JSONP timeout")) {
-    return "Backend timed out. First tap Test Backend. If that times out too, Apps Script was not deployed as a new version or GitHub is still loading an old file.";
+    return "Backend timed out. Tap Test Backend. If Test Backend works, tap Check Last Photo Result. If Test Backend fails, the Apps Script deployment is not responding.";
   }
+
   return text;
 }
-function showError(message){ els.errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(friendlyError(message))}`; els.errorDiv.style.display="block"; }
+
+function showError(message){
+  els.errorDiv.innerHTML = `<strong>Error:</strong> ${escapeHtml(friendlyError(message))}`;
+  els.errorDiv.style.display="block";
+}
+
 function compressImage(file,maxWidth,quality,callback){
   const reader = new FileReader();
+
   reader.onload = function(event){
     const img = new Image();
+
     img.onload = function(){
       const canvas = document.createElement("canvas");
-      let width = img.width, height = img.height;
-      if(width > maxWidth){ height = Math.round(height * (maxWidth / width)); width = maxWidth; }
-      canvas.width = width; canvas.height = height;
+      let width = img.width;
+      let height = img.height;
+
+      if(width > maxWidth){
+        height = Math.round(height * (maxWidth / width));
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
       canvas.getContext("2d").drawImage(img,0,0,width,height);
+
       callback(canvas.toDataURL("image/jpeg",quality));
     };
-    img.onerror = function(){ showError("Could not read the selected image."); };
+
+    img.onerror = function(){
+      showError("Could not read the selected image.");
+    };
+
     img.src = event.target.result;
   };
-  reader.onerror = function(){ showError("Could not load the selected file."); };
+
+  reader.onerror = function(){
+    showError("Could not load the selected file.");
+  };
+
   reader.readAsDataURL(file);
 }
-function escapeHtml(text){ return String(text).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
-function escapeHtmlAttr(text){ return String(text).replaceAll("'","&#039;").replaceAll('"',"&quot;"); }
+
+function escapeHtml(text){
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function escapeHtmlAttr(text){
+  return String(text)
+    .replaceAll("'","&#039;")
+    .replaceAll('"',"&quot;");
+}
+
 renderHistory();
 </script>
 </body>
